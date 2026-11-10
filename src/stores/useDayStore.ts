@@ -13,7 +13,14 @@ interface DayState {
   swap: (date: DateKey, itemId: string, food: Food) => void;
   undoSwap: (date: DateKey, itemId: string) => void;
   toggleMeal: (date: DateKey, mealId: string) => void;
+  /** data -> cada registro de água em ml (lista permite desfazer o último) */
+  waterLog: Record<DateKey, number[]>;
+  addWater: (date: DateKey, ml: number) => void;
+  undoWater: (date: DateKey) => void;
 }
+
+/** Total de água do dia em ml. */
+export const waterTotal = (log: number[] | undefined) => (log ?? []).reduce((sum, ml) => sum + ml, 0);
 
 export const useDayStore = create<DayState>()(
   persist(
@@ -38,8 +45,21 @@ export const useDayStore = create<DayState>()(
           const next = done.includes(mealId) ? done.filter((id) => id !== mealId) : [...done, mealId];
           return { mealsDone: { ...s.mealsDone, [date]: next } };
         }),
+
+      waterLog: {},
+
+      addWater: (date, ml) =>
+        set((s) => ({ waterLog: { ...s.waterLog, [date]: [...(s.waterLog[date] ?? []), ml] } })),
+
+      undoWater: (date) =>
+        set((s) => ({ waterLog: { ...s.waterLog, [date]: (s.waterLog[date] ?? []).slice(0, -1) } })),
     }),
-    { name: 'day-log' },
+    {
+      name: 'day-log',
+      version: 1,
+      // dados salvos antes da água não têm waterLog
+      migrate: (saved) => ({ waterLog: {}, ...(saved as object) }) as DayState,
+    },
   ),
 );
 

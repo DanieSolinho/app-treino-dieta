@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { DietPage } from './features/diet/DietPage';
+import { TodayPage } from './features/today/TodayPage';
 
 type Tab = 'hoje' | 'treinos' | 'dieta' | 'progresso' | 'ajustes';
 
@@ -25,12 +26,14 @@ function ComingSoon({ title }: { title: string }) {
 }
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('dieta');
+  const [tab, setTab] = useState<Tab>('hoje');
   const current = tabs.find((t) => t.id === tab)!;
 
   return (
     <div className="app">
-      {tab === 'dieta' ? <DietPage /> : <ComingSoon title={current.label} />}
+      {tab === 'hoje' && <TodayPage goTo={setTab} />}
+      {tab === 'dieta' && <DietPage />}
+      {tab !== 'hoje' && tab !== 'dieta' && <ComingSoon title={current.label} />}
 
       <nav className="nav" aria-label="Navegação principal">
         {tabs.map((t) => (

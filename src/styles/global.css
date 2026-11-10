@@ -9,6 +9,7 @@
   --brand-soft: #e7f0d8;
   --lime: #c6f36b;
   --water: #1f5fa8;
+  --water-soft: #e3ecf6;
   --radius: 20px;
   --font: 'Inter', system-ui, sans-serif;
   --font-display: 'Space Grotesk', 'Inter', sans-serif;
@@ -129,5 +130,44 @@ button { font: inherit; cursor: pointer; }
   background: none; border: none; padding: 0; font-size: 11px; font-weight: 500; color: var(--muted);
 }
 .nav__item--active { color: var(--brand); font-weight: 600; }
+
+/* Painel Hoje */
+.card__title { margin: 0; font-size: 16px; font-weight: 600; }
+.streak {
+  display: flex; align-items: center; gap: 6px; background: var(--ink); color: var(--bg);
+  padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
+}
+.streak-hint { text-align: center; font-size: 12px; padding: 0 16px; }
+
+.card--dark {
+  background: var(--ink); color: var(--bg); padding: 20px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.card--dark__title { margin: 0; font-family: var(--font-display); font-size: 22px; font-weight: 600; }
+.card--dark__text { margin: 0 0 6px; font-size: 13px; color: #b9c2bd; }
+.eyebrow--lime { color: var(--lime); }
+.btn--lime { height: 48px; background: var(--lime); color: var(--ink); font-size: 15px; border-radius: 14px; }
+
+.ring { position: relative; flex-shrink: 0; }
+.ring__center {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+
+.water { display: flex; align-items: center; gap: 18px; }
+.water__value { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+.water__goal { font-size: 11px; color: var(--muted); }
+.water__side { flex: 1; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.water__buttons { display: flex; gap: 8px; width: 100%; }
+
+.btn-sm { flex: 1; height: 44px; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; }
+.btn-sm--soft { background: var(--water-soft); color: var(--water); }
+.btn-sm--water { background: var(--water); color: #fff; }
+.btn-sm:active, .btn:active { transform: scale(0.97); }
+
+.next-meal { margin-top: 4px; }
+.next-meal .meal__name { flex: 1; }
+.next-meal__time { font-size: 12px; font-weight: 600; color: var(--brand); }
+.link-btn--lg { font-size: 13px; min-height: 32px; text-align: left; }
 
 :focus-visible { outline: 3px solid var(--water); outline-offset: 2px; }
