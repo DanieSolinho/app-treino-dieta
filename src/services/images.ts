@@ -108,6 +108,21 @@ export async function uploadBundledImages(userId: string): Promise<number> {
   return sent;
 }
 
+/** Envia (ou troca) fotos vindas de um plano importado. Devolve quantas falharam. */
+export async function uploadPlanImages(userId: string, images: { name: string; data: string }[]): Promise<number> {
+  if (!supabase) return images.length;
+  let failed = 0;
+  for (const img of images) {
+    const bytes = Uint8Array.from(atob(img.data), (c) => c.charCodeAt(0));
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(imagePath(userId, img.name), new Blob([bytes], { type: 'image/webp' }), { contentType: 'image/webp', upsert: true });
+    if (error) failed++;
+  }
+  useLinks.setState({ links: {} }); // pede os links de novo (fotos novas ou trocadas)
+  return failed;
+}
+
 /** Apaga todas as fotos da conta logada (usado ao excluir a conta). */
 export async function deleteMyImages(): Promise<{ ok: true } | { ok: false; error: string }> {
   const userId = useAuth.getState().user?.id;

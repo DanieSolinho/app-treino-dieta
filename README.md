@@ -129,6 +129,8 @@ npm run dev                  # o Vite serve /api localmente (plugin em vite.conf
 
 ### Escanear rótulo na Vercel (quando for ativar)
 
+O botão fica escondido até existir `VITE_SCAN_ENABLED=true` (no `.env.local` e nas variáveis da Vercel).
+
 Em **Settings › Environment Variables**, cadastre `ANTHROPIC_API_KEY` e `SCAN_ACCESS_CODE` e faça um novo deploy. Sem elas, a função responde que o recurso não está configurado.
 
 ## Publicar (Vercel) e instalar no celular (PWA)
@@ -138,6 +140,16 @@ Em **Settings › Environment Variables**, cadastre `ANTHROPIC_API_KEY` e `SCAN_
 - A Vercel monta o app a partir do GitHub, então **sem** `src/data/private`: o site publicado não contém a dieta, as fichas nem as fotos. Tudo isso chega pela conta depois do login (sincronização + fotos privadas).
 - PWA: `public/manifest.webmanifest`, ícones em `public/icons/` (fonte `icon.svg`) e `public/sw.js`, registrado só no build de produção. O service worker guarda as páginas e os arquivos do site para abrir sem internet; dados, login e fotos do Supabase não passam por ele.
 - No Supabase, **Authentication › URL Configuration**: Site URL = endereço da Vercel; Redirect URLs = endereço da Vercel e `http://localhost:5173`.
+
+## Importar plano (Ajustes › Plano)
+
+Quando chega dieta, treino ou agenda nova, o app recebe um arquivo `.json` (formato `treino-dieta-plano`, versão 1) com qualquer parte: `diet`, `workouts`, `schedule`, `stretches` e `images` (fotos .webp em base64).
+
+- `src/lib/planImport.ts`: confere tudo antes (refeições, grupos de substituição, exercícios, agenda só com fichas que existem, fotos até 2 MB), mostra o resumo do que muda e só aplica depois da confirmação.
+- Exercício que continua (mesmo nome, ignorando acentos e maiúsculas) mantém o id e a carga atual: o histórico e a sugestão de carga seguem.
+- A agenda nova junta com a antiga (datas iguais são substituídas). Treinos feitos, água, peso e medidas não mudam.
+- As mudanças sobem sozinhas pela sincronização; as fotos vão para o armazenamento privado da conta.
+- Gerar o arquivo a partir de `src/data/private`: `npx vite-node scripts/export-plan.ts -- --label "Plano de dezembro" --only workouts,schedule --images inf-12 --out plano-dez.json`
 
 ## Dados pessoais (fora do Git)
 

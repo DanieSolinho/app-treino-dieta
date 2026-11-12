@@ -510,3 +510,9 @@ fieldset.field > legend { margin-bottom: 8px; }
 @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
 
 :focus-visible { outline: 3px solid var(--water); outline-offset: 2px; }
+
+/* Ajustes › Plano (importar) */
+.import__block { border-top: 1px solid var(--line); padding-top: 10px; }
+.import__title { margin: 0 0 4px; font-size: 13px; font-weight: 600; }
+.import__list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; }
+.import__note { font-size: 12px; }

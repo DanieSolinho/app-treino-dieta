@@ -6,6 +6,9 @@ import { formatAmount, formatPortions, sameFood, substitutesFor } from '../../li
 import { toDateKey } from '../../lib/date';
 import { ScanLabel } from './ScanLabel';
 
+/** "Escanear rótulo" fica escondido até a API ser ativada (VITE_SCAN_ENABLED=true no .env). */
+const scanEnabled = import.meta.env.VITE_SCAN_ENABLED === 'true';
+
 interface Props {
   item: MealItem | null;
   mealName: string;
@@ -102,6 +105,7 @@ export function SubstitutionSheet({ item, mealName, onClose }: Props) {
             ))}
           </fieldset>
 
+          {scanEnabled && (
           <ScanLabel
             key={item.id}
             item={item}
@@ -111,6 +115,7 @@ export function SubstitutionSheet({ item, mealName, onClose }: Props) {
               onClose();
             }}
           />
+          )}
         </div>
 
         <p className="note">A troca vale só para hoje. Seu plano continua igual.</p>

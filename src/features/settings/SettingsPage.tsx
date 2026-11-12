@@ -4,6 +4,7 @@ import { deleteAccountAndClear, pendingCount, signOutAndClear, syncNow, useSyncM
 import { cloudEnabled } from '../../services/supabase';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { NumberStepper } from '../../components/ui/NumberStepper';
+import { ImportPlan } from './ImportPlan';
 
 function SyncCard() {
   const state = useSyncStatus((s) => s.state);
@@ -144,6 +145,8 @@ export function SettingsPage() {
           <p className="muted">Modo só neste aparelho: os dados ficam salvos apenas neste navegador.</p>
         )}
       </section>
+
+      <ImportPlan />
 
       <section className="card stack-sm" aria-labelledby="water-goal-title">
         <h2 id="water-goal-title" className="card__title">
