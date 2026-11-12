@@ -5,6 +5,7 @@ import { cloudEnabled } from '../../services/supabase';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { NumberStepper } from '../../components/ui/NumberStepper';
 import { ImportPlan } from './ImportPlan';
+import { RemindersCard } from './RemindersCard';
 import { downloadMyData } from '../../lib/exportData';
 import { exitDemo } from '../../services/demo';
 
@@ -155,6 +156,8 @@ export function SettingsPage() {
           <p className="muted">Modo só neste aparelho: os dados ficam salvos apenas neste navegador.</p>
         )}
       </section>
+
+      {cloudEnabled && user && <RemindersCard userId={user.id} />}
 
       {!demo && <ImportPlan />}
 

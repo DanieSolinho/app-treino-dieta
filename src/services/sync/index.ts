@@ -5,6 +5,7 @@ import { createEngine, resetLocalData, useSyncMeta, useSyncStatus, type Engine }
 import { supabaseSyncApi } from './supabaseApi';
 import { isDirty, pendingCount } from './types';
 import { clearImageLinks, deleteMyImages, uploadBundledImages } from '../images';
+import { disablePush } from '../reminders';
 
 export { useSyncMeta, useSyncStatus, pendingCount };
 
@@ -32,6 +33,8 @@ export async function signOutAndClear(): Promise<Result> {
         error: 'Há alterações que ainda não foram enviadas. Conecte-se à internet antes de sair, para não perdê-las.',
       };
   }
+  // este aparelho deixa de receber os lembretes da conta (enquanto ainda está logado para apagar)
+  await disablePush().catch(() => {});
   const r = await signOutRemote();
   if (!r.ok) return r;
   engine?.stop();

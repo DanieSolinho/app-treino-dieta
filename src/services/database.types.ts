@@ -142,6 +142,54 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: { auth: string; created_at: string; endpoint: string; id: string; p256dh: string; user_agent: string | null; user_id: string }
+        Insert: { auth: string; created_at?: string; endpoint: string; id?: string; p256dh: string; user_agent?: string | null; user_id: string }
+        Update: { auth?: string; created_at?: string; endpoint?: string; id?: string; p256dh?: string; user_agent?: string | null; user_id?: string }
+        Relationships: []
+      }
+      reminder_settings: {
+        Row: {
+          last_water_push_at: string | null
+          last_workout_push_on: string | null
+          timezone: string
+          updated_at: string
+          user_id: string
+          water_enabled: boolean
+          water_every_min: number
+          window_end: string
+          window_start: string
+          workout_enabled: boolean
+          workout_time: string
+        }
+        Insert: {
+          last_water_push_at?: string | null
+          last_workout_push_on?: string | null
+          timezone?: string
+          updated_at?: string
+          user_id: string
+          water_enabled?: boolean
+          water_every_min?: number
+          window_end?: string
+          window_start?: string
+          workout_enabled?: boolean
+          workout_time?: string
+        }
+        Update: {
+          last_water_push_at?: string | null
+          last_workout_push_on?: string | null
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+          water_enabled?: boolean
+          water_every_min?: number
+          window_end?: string
+          window_start?: string
+          workout_enabled?: boolean
+          workout_time?: string
+        }
+        Relationships: []
+      }
       workout_sessions: {
         Row: {
           cardio: Json | null
@@ -184,6 +232,11 @@ export type Database = {
     }
     Functions: {
       delete_my_account: { Args: never; Returns: undefined }
+      save_push_subscription: {
+        Args: { p_auth: string; p_endpoint: string; p_p256dh: string; p_user_agent?: string }
+        Returns: undefined
+      }
+      vapid_public_key: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never

@@ -151,6 +151,15 @@ Em **Settings › Environment Variables**, cadastre `ANTHROPIC_API_KEY` e `SCAN_
 - **Baixar meus dados** (Ajustes): arquivo JSON com tudo (backup e RGPD).
 - **E-mails em português**: modelos em `supabase/email-templates/`, colados no painel em Authentication › Email Templates.
 
+## Lembretes (Ajustes › Lembretes)
+
+Notificações push de água e de treino, inclusive no iPhone com o app instalado na tela de início.
+
+- **Água**: se você ficar X horas (1h a 3h) sem registrar e ainda faltar para a meta, dentro do horário escolhido. A mensagem diz quanto falta.
+- **Treino**: um aviso por dia a partir do horário escolhido, só em dia de treino (agenda ou dia da semana) e se ainda não treinou.
+- Como funciona: o aparelho se inscreve (`src/services/reminders.ts`, `public/sw.js`) → a cada 15 min o `pg_cron` chama a Edge Function `send-reminders` (`supabase/functions/send-reminders/`) com uma senha guardada no banco → `logic.ts` decide (testado no Vitest) e o envio usa Web Push com chaves VAPID geradas e guardadas no próprio banco (`app_secrets`, sem acesso pelo app).
+- Tabelas `push_subscriptions` e `reminder_settings` com RLS; tudo é apagado junto com a conta; sair da conta para os lembretes naquele aparelho.
+
 ## Importar plano (Ajustes › Plano)
 
 Quando chega dieta, treino ou agenda nova, o app recebe um arquivo `.json` (formato `treino-dieta-plano`, versão 1) com qualquer parte: `diet`, `workouts`, `schedule`, `stretches` e `images` (fotos .webp em base64).
