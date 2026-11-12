@@ -1,8 +1,51 @@
 import { useState } from 'react';
-import { deleteAccount, signOut, useAuth } from '../../services/auth';
+import { useAuth } from '../../services/auth';
+import { deleteAccountAndClear, pendingCount, signOutAndClear, syncNow, useSyncMeta, useSyncStatus } from '../../services/sync';
 import { cloudEnabled } from '../../services/supabase';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { NumberStepper } from '../../components/ui/NumberStepper';
+
+function SyncCard() {
+  const state = useSyncStatus((s) => s.state);
+  const pending = useSyncMeta((s) => pendingCount(s.dirty));
+  const last = useSyncMeta((s) => s.lastSyncedAt);
+  const [busy, setBusy] = useState(false);
+
+  const when = last
+    ? new Date(last).toLocaleString('pt-BR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+    : null;
+  const text =
+    state === 'sincronizando' || busy
+      ? 'Sincronizando…'
+      : state === 'offline'
+        ? `Sem conexão. ${pending ? `${pending} ${pending === 1 ? 'alteração guardada' : 'alterações guardadas'} neste aparelho` : 'Tudo guardado neste aparelho'} — vai quando a internet voltar.`
+        : pending
+          ? `${pending} ${pending === 1 ? 'alteração' : 'alterações'} aguardando envio.`
+          : when
+            ? `Tudo sincronizado · ${when}`
+            : 'Ainda não sincronizado.';
+
+  return (
+    <div className="sync">
+      <span className={`sync__dot sync__dot--${state === 'offline' ? 'off' : pending || state === 'sincronizando' ? 'busy' : 'ok'}`} aria-hidden="true" />
+      <p className="sync__text" role="status">
+        {text}
+      </p>
+      <button
+        type="button"
+        className="link-btn"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          await syncNow();
+          setBusy(false);
+        }}
+      >
+        Sincronizar agora
+      </button>
+    </div>
+  );
+}
 
 const liters = (ml: number) => `${(ml / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} L`;
 
@@ -26,7 +69,8 @@ function DangerZone() {
         Apagar a conta
       </h2>
       <p className="muted">
-        Isso apaga sua conta e todos os dados guardados no servidor: plano, treinos, peso e medidas. Não dá para desfazer.
+        Isso apaga sua conta e todos os dados guardados no servidor e neste aparelho: plano, treinos, peso e medidas. Não dá
+        para desfazer.
       </p>
       <label className="field">
         <span className="field__label">Para confirmar, digite APAGAR</span>
@@ -47,7 +91,7 @@ function DangerZone() {
           disabled={typed.trim().toUpperCase() !== 'APAGAR' || busy}
           onClick={async () => {
             setBusy(true);
-            const r = await deleteAccount();
+            const r = await deleteAccountAndClear();
             setBusy(false);
             if (!r.ok) setError(r.error);
           }}
@@ -79,11 +123,12 @@ export function SettingsPage() {
               {user.displayName && <p className="account__name">{user.displayName}</p>}
               <p className="muted">{user.email}</p>
             </div>
+            <SyncCard />
             <button
               type="button"
               className="btn-sm btn-sm--outline account__signout"
               onClick={async () => {
-                const r = await signOut();
+                const r = await signOutAndClear();
                 if (!r.ok) setError(r.error);
               }}
             >

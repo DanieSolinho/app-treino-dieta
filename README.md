@@ -84,6 +84,18 @@ Sem o `.env.local`, o app funciona como antes, só no aparelho.
 
 **Login** (`src/services/auth.ts` + `src/features/auth/`): criar conta com confirmação por e-mail, entrar, sair, esqueci minha senha → nova senha, e apagar conta em Ajustes. Erros do Supabase traduzidos pelos códigos (`invalid_credentials`, `email_not_confirmed`…). No painel do Supabase, **Authentication › URL Configuration** precisa ter o endereço do app em Site URL e Redirect URLs.
 
+### Sincronização (`src/services/sync/`)
+
+Offline primeiro: o app lê e grava no aparelho, e o motor envia só o que mudou.
+
+- Observa as stores e anota o que mudou (`sync-meta` no aparelho, sobrevive a fechar o app).
+- Envia ~1,5 s depois de cada mudança; sem internet, guarda e tenta quando volta (`online`) ou ao abrir o app.
+- Busca as novidades ao entrar, ao voltar para o app (a cada 30 s no máximo) e quando a internet volta.
+- Conta vazia + aparelho com dados → sobe tudo (primeira vez). Aparelho novo → os dados da conta substituem os de exemplo.
+- Conflito: vale o último envio, mas o que está pendente no aparelho nunca é sobrescrito.
+- Sair envia o que falta e limpa o aparelho; outra conta no mesmo navegador não vê nada da anterior.
+- `engine.ts` não conhece o Supabase: recebe um `SyncApi` (real em `supabaseApi.ts`, falso nos testes).
+
 ## Back-end: escanear rótulo (`api/analyze-label.ts`)
 
 Na troca de um alimento, "Tem outro alimento?" tira uma foto do rótulo (ou do alimento) e calcula quanto dá para comer no lugar da porção do plano.

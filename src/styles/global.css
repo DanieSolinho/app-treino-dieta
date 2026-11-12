@@ -495,4 +495,18 @@ fieldset.field > legend { margin-bottom: 8px; }
 .light-stepper .stepper__btn { background: var(--surface); color: var(--ink); }
 .light-stepper .stepper__label { color: var(--muted); }
 
+/* Sincronização */
+.sync { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 12px; background: var(--bg); }
+.sync__dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sync__dot--ok { background: var(--brand); }
+.sync__dot--busy { background: #e0a100; }
+.sync__dot--off { background: #b3261e; }
+.sync__text { flex: 1; margin: 0; font-size: 13px; color: var(--muted); min-width: 160px; }
+.spinner {
+  width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--brand);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+
 :focus-visible { outline: 3px solid var(--water); outline-offset: 2px; }
