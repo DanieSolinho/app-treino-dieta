@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { DietPage } from './features/diet/DietPage';
 import { TodayPage } from './features/today/TodayPage';
+import { WorkoutsFeature } from './features/workouts/WorkoutsFeature';
+import { ProgressPage } from './features/progress/ProgressPage';
 
 type Tab = 'hoje' | 'treinos' | 'dieta' | 'progresso' | 'ajustes';
 
@@ -33,7 +35,9 @@ export default function App() {
     <div className="app">
       {tab === 'hoje' && <TodayPage goTo={setTab} />}
       {tab === 'dieta' && <DietPage />}
-      {tab !== 'hoje' && tab !== 'dieta' && <ComingSoon title={current.label} />}
+      {tab === 'treinos' && <WorkoutsFeature />}
+      {tab === 'progresso' && <ProgressPage />}
+      {tab === 'ajustes' && <ComingSoon title={current.label} />}
 
       <nav className="nav" aria-label="Navegação principal">
         {tabs.map((t) => (

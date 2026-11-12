@@ -1,57 +1,39 @@
 import type { DietPlan } from '../types/diet';
+import { f, vontade } from '../lib/food';
 
 /**
- * PLANO DE EXEMPLO — só para o app ter dados ao abrir.
- * Substitua pelos alimentos, quantidades e equivalências do plano da sua nutricionista.
+ * PLANO DE EXEMPLO — é o que aparece no repositório público.
+ * O seu plano real fica em src/data/private/ (fora do Git).
  */
 export const samplePlan: DietPlan = {
+  title: 'Plano de exemplo',
   groups: [
     {
       id: 'carboidratos',
       name: 'Carboidratos',
       options: [
-        { name: 'Arroz branco', amount: 100, unit: 'g' },
-        { name: 'Batata-doce', amount: 150, unit: 'g' },
-        { name: 'Mandioca cozida', amount: 100, unit: 'g' },
-        { name: 'Macarrão integral', amount: 90, unit: 'g' },
-        { name: 'Cuscuz de milho', amount: 100, unit: 'g' },
+        f('Arroz branco cozido', 1, 'colher(es) de sopa cheia(s)', 25),
+        f('Batata-doce cozida', 1, 'fatia(s) pequena(s)', 40),
+        f('Mandioca cozida', 1, 'colher(es) de sopa rasa(s)', 25),
+        f('Macarrão integral cozido', 1, 'colher(es) de arroz rasa(s)', 25),
       ],
     },
     {
       id: 'proteinas',
       name: 'Proteínas',
       options: [
-        { name: 'Frango grelhado', amount: 120, unit: 'g' },
-        { name: 'Patinho moído', amount: 100, unit: 'g' },
-        { name: 'Tilápia grelhada', amount: 140, unit: 'g' },
-        { name: 'Ovos cozidos', amount: 3, unit: 'un' },
-      ],
-    },
-    {
-      id: 'leguminosas',
-      name: 'Leguminosas',
-      options: [
-        { name: 'Feijão', amount: 1, unit: 'concha' },
-        { name: 'Lentilha', amount: 1, unit: 'concha' },
-        { name: 'Grão-de-bico', amount: 4, unit: 'colher' },
+        f('Filé de frango grelhado', 1, 'bife(s) pequeno(s)', 50),
+        f('Patinho moído refogado', 2, 'colher(es) de sopa cheia(s)', 50),
+        f('Filé de tilápia', 1, 'filé(s) médio(s)', 60),
       ],
     },
     {
       id: 'frutas',
       name: 'Frutas',
       options: [
-        { name: 'Banana', amount: 1, unit: 'un' },
-        { name: 'Maçã', amount: 1, unit: 'un' },
-        { name: 'Mamão', amount: 1, unit: 'fatia' },
-      ],
-    },
-    {
-      id: 'paes',
-      name: 'Pães',
-      options: [
-        { name: 'Pão integral', amount: 2, unit: 'fatia' },
-        { name: 'Tapioca', amount: 3, unit: 'colher' },
-        { name: 'Aveia', amount: 3, unit: 'colher' },
+        f('Banana prata', 1, 'unidade(s) média(s)', 65),
+        f('Maçã', 1, 'unidade(s) pequena(s)', 90),
+        f('Mamão', 1, 'fatia(s) média(s)', 170),
       ],
     },
   ],
@@ -59,50 +41,49 @@ export const samplePlan: DietPlan = {
     {
       id: 'cafe',
       name: 'Café da manhã',
-      time: '08:00',
       items: [
-        { id: 'cafe-pao', food: { name: 'Pão integral', amount: 2, unit: 'fatia' }, groupId: 'paes' },
-        { id: 'cafe-ovos', food: { name: 'Ovos mexidos', amount: 2, unit: 'un' } },
-        { id: 'cafe-fruta', food: { name: 'Mamão', amount: 1, unit: 'fatia' }, groupId: 'frutas' },
-      ],
-    },
-    {
-      id: 'lanche-manha',
-      name: 'Lanche da manhã',
-      time: '10:30',
-      items: [
-        { id: 'lm-fruta', food: { name: 'Banana', amount: 1, unit: 'un' }, groupId: 'frutas' },
-        { id: 'lm-iogurte', food: { name: 'Iogurte natural', amount: 170, unit: 'g' } },
+        { id: 'cafe-ovos', food: f('Ovos mexidos', 2, 'unidade(s)', 100) },
+        { id: 'cafe-fruta', food: f('Banana prata', 1, 'unidade(s) média(s)', 65), group: { id: 'frutas', portions: 1 } },
       ],
     },
     {
       id: 'almoco',
       name: 'Almoço',
-      time: '13:00',
+      defaultLabel: 'Com feijão',
       items: [
-        { id: 'alm-arroz', food: { name: 'Arroz branco', amount: 100, unit: 'g' }, groupId: 'carboidratos' },
-        { id: 'alm-feijao', food: { name: 'Feijão', amount: 1, unit: 'concha' }, groupId: 'leguminosas' },
-        { id: 'alm-frango', food: { name: 'Frango grelhado', amount: 120, unit: 'g' }, groupId: 'proteinas' },
-        { id: 'alm-salada', food: { name: 'Salada verde à vontade', amount: 1, unit: 'un' } },
+        { id: 'alm-salada', food: vontade('Salada verde') },
+        {
+          id: 'alm-arroz',
+          food: f('Arroz branco', 4, 'colher(es) de sopa cheia(s)', 100),
+          options: [f('Macarrão integral cozido', 4, 'colher(es) de arroz rasa(s)', 100)],
+          group: { id: 'carboidratos', portions: 4 },
+        },
+        { id: 'alm-feijao', food: f('Feijão', 1, 'concha(s) pequena(s)', 65) },
+        { id: 'alm-frango', food: f('Frango grelhado', 2, 'bife(s) pequeno(s)', 100), group: { id: 'proteinas', portions: 2 } },
+      ],
+      variants: [
+        {
+          id: 'sem-feijao',
+          label: 'Sem feijão',
+          items: [
+            { id: 'alm2-salada', food: vontade('Salada verde') },
+            { id: 'alm2-arroz', food: f('Arroz branco', 6, 'colher(es) de sopa cheia(s)', 150), group: { id: 'carboidratos', portions: 6 } },
+            { id: 'alm2-frango', food: f('Frango grelhado', 2, 'bife(s) pequeno(s)', 100), group: { id: 'proteinas', portions: 2 } },
+          ],
+        },
       ],
     },
     {
-      id: 'lanche-tarde',
-      name: 'Lanche da tarde',
-      time: '16:30',
-      items: [
-        { id: 'lt-fruta', food: { name: 'Maçã', amount: 1, unit: 'un' }, groupId: 'frutas' },
-        { id: 'lt-pao', food: { name: 'Tapioca', amount: 3, unit: 'colher' }, groupId: 'paes' },
-      ],
+      id: 'lanche',
+      name: 'Lanche',
+      items: [{ id: 'lan-fruta', food: f('Maçã', 1, 'unidade(s) pequena(s)', 90), group: { id: 'frutas', portions: 1 } }],
     },
     {
       id: 'jantar',
       name: 'Jantar',
-      time: '20:00',
       items: [
-        { id: 'jan-carbo', food: { name: 'Batata-doce', amount: 150, unit: 'g' }, groupId: 'carboidratos' },
-        { id: 'jan-prot', food: { name: 'Tilápia grelhada', amount: 140, unit: 'g' }, groupId: 'proteinas' },
-        { id: 'jan-legumes', food: { name: 'Legumes cozidos', amount: 1, unit: 'un' } },
+        { id: 'jan-carbo', food: f('Batata-doce cozida', 3, 'fatia(s) pequena(s)', 120), group: { id: 'carboidratos', portions: 3 } },
+        { id: 'jan-prot', food: f('Filé de tilápia', 2, 'filé(s) médio(s)', 120), group: { id: 'proteinas', portions: 2 } },
       ],
     },
   ],

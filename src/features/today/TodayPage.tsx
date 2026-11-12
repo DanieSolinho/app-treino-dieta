@@ -3,6 +3,7 @@ import { useDayStore } from '../../stores/useDayStore';
 import { formatLongDate, toDateKey } from '../../lib/date';
 import { WaterTracker } from './WaterTracker';
 import { useStreak } from './useStreak';
+import { TodayWorkoutCard } from './TodayWorkoutCard';
 
 const NO_MEALS: string[] = [];
 
@@ -40,14 +41,7 @@ export function TodayPage({ goTo }: Props) {
         </span>
       </header>
 
-      <section className="card card--dark">
-        <p className="eyebrow eyebrow--lime">Treino de hoje</p>
-        <h2 className="card--dark__title">Em breve</h2>
-        <p className="card--dark__text">Fichas de treino e sugestão de carga chegam na próxima etapa.</p>
-        <button type="button" className="btn btn--lime" onClick={() => goTo('treinos')}>
-          Ver treinos
-        </button>
-      </section>
+      <TodayWorkoutCard goTo={goTo} />
 
       <WaterTracker />
 
@@ -63,7 +57,7 @@ export function TodayPage({ goTo }: Props) {
           <label className="meal__check next-meal">
             <input type="checkbox" checked={false} onChange={() => toggleMeal(date, nextMeal.id)} />
             <span className="meal__name">{nextMeal.name}</span>
-            <span className="next-meal__time">{nextMeal.time} · próxima</span>
+            <span className="next-meal__time">{nextMeal.time ? `${nextMeal.time} · próxima` : 'próxima'}</span>
           </label>
         ) : (
           <p className="muted">Todas as refeições de hoje feitas.</p>

@@ -2,3 +2,10 @@ node_modules
 dist
 *.log
 .DS_Store
+
+# Dados pessoais (plano alimentar, fichas de treino) — nunca vão para o GitHub
+src/data/private/
+
+# Segredos locais (chave da API)
+.env.local
+.env*.local

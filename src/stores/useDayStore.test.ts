@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { useDayStore, waterTotal } from './useDayStore';
 
 const today = '2026-11-10';
-const batata = { name: 'Batata-doce', amount: 150, unit: 'g' as const };
+const batata = { name: 'Batata-doce', qty: 3, measure: 'fatia(s) pequena(s)', grams: 120 };
 
 describe('trocas da dieta', () => {
   beforeEach(() => useDayStore.setState({ swaps: {}, mealsDone: {}, waterLog: {} }));

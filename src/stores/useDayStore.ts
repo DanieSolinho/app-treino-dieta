@@ -17,6 +17,9 @@ interface DayState {
   waterLog: Record<DateKey, number[]>;
   addWater: (date: DateKey, ml: number) => void;
   undoWater: (date: DateKey) => void;
+  /** data -> refeição -> versão escolhida ("sem-feijao"); ausente = versão principal */
+  variants: Record<DateKey, Record<string, string>>;
+  chooseVariant: (date: DateKey, mealId: string, variantId: string | null) => void;
 }
 
 /** Total de água do dia em ml. */
@@ -53,12 +56,28 @@ export const useDayStore = create<DayState>()(
 
       undoWater: (date) =>
         set((s) => ({ waterLog: { ...s.waterLog, [date]: (s.waterLog[date] ?? []).slice(0, -1) } })),
+
+      variants: {},
+
+      chooseVariant: (date, mealId, variantId) =>
+        set((s) => {
+          const { [mealId]: _old, ...rest } = s.variants[date] ?? {};
+          const day = variantId ? { ...rest, [mealId]: variantId } : rest;
+          return { variants: { ...s.variants, [date]: day } };
+        }),
     }),
     {
       name: 'day-log',
-      version: 1,
-      // dados salvos antes da água não têm waterLog
-      migrate: (saved) => ({ waterLog: {}, ...(saved as object) }) as DayState,
+      version: 2,
+      migrate: (saved, version) => {
+        const s = (saved ?? {}) as Partial<DayState>;
+        return {
+          mealsDone: s.mealsDone ?? {},
+          waterLog: s.waterLog ?? {}, // v0 não tinha água
+          swaps: version < 2 ? {} : (s.swaps ?? {}), // v2 mudou o formato dos alimentos
+          variants: s.variants ?? {},
+        } as DayState;
+      },
     },
   ),
 );

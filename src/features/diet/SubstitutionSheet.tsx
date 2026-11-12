@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { Food, MealItem } from '../../types/diet';
 import { useDietStore } from '../../stores/useDietStore';
 import { useDayStore } from '../../stores/useDayStore';
-import { formatAmount, sameFood } from '../../lib/food';
+import { formatAmount, formatPortions, sameFood, substitutesFor } from '../../lib/food';
 import { toDateKey } from '../../lib/date';
+import { ScanLabel } from './ScanLabel';
 
 interface Props {
   item: MealItem | null;
@@ -11,15 +12,28 @@ interface Props {
   onClose: () => void;
 }
 
+function Option({ food, checked, tag, onPick }: { food: Food; checked: boolean; tag?: string; onPick: () => void }) {
+  return (
+    <label className={`option ${checked ? 'option--checked' : ''}`}>
+      <input type="radio" name="troca" checked={checked} onChange={onPick} />
+      <span className="option__text">
+        <span className="option__name">
+          {food.name}
+          {tag && <span className="muted"> · {tag}</span>}
+        </span>
+        <span className="option__amount">{formatAmount(food)}</span>
+      </span>
+    </label>
+  );
+}
+
 export function SubstitutionSheet({ item, mealName, onClose }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const getGroup = useDietStore((s) => s.getGroup);
+  const groups = useDietStore((s) => s.plan.groups);
   const date = toDateKey();
   const current = useDayStore((s) => (item ? s.swaps[date]?.[item.id] : undefined));
   const swap = useDayStore((s) => s.swap);
   const undoSwap = useDayStore((s) => s.undoSwap);
-
-  const group = item?.groupId ? getGroup(item.groupId) : undefined;
   const [selected, setSelected] = useState<Food | null>(null);
 
   // abre/fecha o <dialog> nativo (foco e tecla Esc já vêm de graça)
@@ -35,10 +49,8 @@ export function SubstitutionSheet({ item, mealName, onClose }: Props) {
 
   if (!item) return <dialog ref={dialogRef} className="sheet" />;
 
-  // o original sempre aparece primeiro, mesmo se não estiver na lista do grupo
-  const options = group
-    ? [item.food, ...group.options.filter((o) => !sameFood(o, item.food) && o.name !== item.food.name)]
-    : [item.food];
+  const { fromMeal, fromGroup, group, portions } = substitutesFor(item, groups);
+  const isChecked = (food: Food) => (selected ? sameFood(selected, food) : false);
 
   function confirm() {
     if (!item || !selected) return;
@@ -59,9 +71,7 @@ export function SubstitutionSheet({ item, mealName, onClose }: Props) {
         <div className="sheet__handle" aria-hidden="true" />
         <header className="sheet__header">
           <div>
-            <p className="eyebrow">
-              {mealName} · {group?.name ?? 'Sem grupo'}
-            </p>
+            <p className="eyebrow">{mealName}</p>
             <h2 id="sheet-title" className="sheet__title">
               Trocar {item.food.name.toLowerCase()}
             </h2>
@@ -74,22 +84,34 @@ export function SubstitutionSheet({ item, mealName, onClose }: Props) {
           </button>
         </header>
 
-        <fieldset className="options">
-          <legend className="sr-only">Escolha um equivalente</legend>
-          {options.map((food, i) => {
-            const checked = selected ? sameFood(selected, food) : false;
-            return (
-              <label key={`${food.name}-${i}`} className={`option ${checked ? 'option--checked' : ''}`}>
-                <input type="radio" name="troca" checked={checked} onChange={() => setSelected(food)} />
-                <span className="option__name">
-                  {food.name}
-                  {i === 0 && <span className="muted"> · original</span>}
-                </span>
-                <span className="option__amount">{formatAmount(food)}</span>
-              </label>
-            );
-          })}
-        </fieldset>
+        <div className="sheet__scroll">
+          <fieldset className="options">
+            <legend className="sr-only">Escolha um equivalente</legend>
+            <Option food={item.food} checked={isChecked(item.food)} tag="original" onPick={() => setSelected(item.food)} />
+            {fromMeal.map((food) => (
+              <Option key={`m-${food.name}`} food={food} checked={isChecked(food)} onPick={() => setSelected(food)} />
+            ))}
+
+            {group && fromGroup.length > 0 && (
+              <p className="options__divider">
+                Ou {formatPortions(portions ?? 1)} do {group.name.toLowerCase()}
+              </p>
+            )}
+            {fromGroup.map((food) => (
+              <Option key={`g-${food.name}`} food={food} checked={isChecked(food)} onPick={() => setSelected(food)} />
+            ))}
+          </fieldset>
+
+          <ScanLabel
+            key={item.id}
+            item={item}
+            groupName={group?.name}
+            onUse={(food) => {
+              swap(date, item.id, food);
+              onClose();
+            }}
+          />
+        </div>
 
         <p className="note">A troca vale só para hoje. Seu plano continua igual.</p>
 

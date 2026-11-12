@@ -11,6 +11,7 @@ const NO_MEALS: string[] = [];
 
 export function DietPage() {
   const meals = useDietStore((s) => s.plan.meals);
+  const title = useDietStore((s) => s.plan.title);
   const date = toDateKey();
   const done = useDayStore((s) => s.mealsDone[date] ?? NO_MEALS);
   const swapsToday = useDayStore((s) => Object.keys(s.swaps[date] ?? {}).length);
@@ -29,6 +30,8 @@ export function DietPage() {
           {done.length} de {meals.length}
         </span>
       </header>
+
+      {title && <p className="muted">{title}</p>}
 
       {swapsToday > 0 && (
         <p className="note">

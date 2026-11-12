@@ -1,6 +1,6 @@
 import type { Meal, MealItem } from '../../types/diet';
 import { useDayStore, useFoodForDay } from '../../stores/useDayStore';
-import { formatAmount } from '../../lib/food';
+import { formatAmount, hasSubstitutes } from '../../lib/food';
 import { toDateKey } from '../../lib/date';
 
 interface Props {
@@ -17,9 +17,8 @@ function MealItemRow({ item, onSwap }: { item: MealItem; onSwap: (item: MealItem
   return (
     <li className="item">
       <div className="item__text">
-        <span className={isSwapped ? 'item__name item__name--swapped' : 'item__name'}>
-          {food.name} · {formatAmount(food)}
-        </span>
+        <span className={isSwapped ? 'item__name item__name--swapped' : 'item__name'}>{food.name}</span>
+        <span className="item__amount">{formatAmount(food)}</span>
         {isSwapped && (
           <span className="item__swap-info">
             no lugar de {item.food.name.toLowerCase()} ·{' '}
@@ -29,7 +28,7 @@ function MealItemRow({ item, onSwap }: { item: MealItem; onSwap: (item: MealItem
           </span>
         )}
       </div>
-      {item.groupId && (
+      {hasSubstitutes(item) && (
         <button type="button" className="swap-btn" aria-label={`Trocar ${food.name}`} onClick={() => onSwap(item)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" />
@@ -40,7 +39,19 @@ function MealItemRow({ item, onSwap }: { item: MealItem; onSwap: (item: MealItem
   );
 }
 
+/** Itens da versão escolhida para o dia (ex.: almoço "Sem feijão"). */
+export function useMealItems(meal: Meal) {
+  const date = toDateKey();
+  const variantId = useDayStore((s) => s.variants[date]?.[meal.id]);
+  const variant = meal.variants?.find((v) => v.id === variantId);
+  return { items: variant?.items ?? meal.items, variantId: variant?.id ?? null };
+}
+
 export function MealCard({ meal, done, onToggle, onSwap }: Props) {
+  const { items, variantId } = useMealItems(meal);
+  const chooseVariant = useDayStore((s) => s.chooseVariant);
+  const date = toDateKey();
+
   return (
     <article className={`card meal ${done ? 'meal--done' : ''}`}>
       <header className="meal__header">
@@ -48,10 +59,28 @@ export function MealCard({ meal, done, onToggle, onSwap }: Props) {
           <input type="checkbox" checked={done} onChange={onToggle} />
           <span className="meal__name">{meal.name}</span>
         </label>
-        <span className="muted">{meal.time}</span>
+        {meal.time && <span className="muted">{meal.time}</span>}
       </header>
+
+      {meal.variants?.length ? (
+        <div className="variant" role="radiogroup" aria-label={`Versão do ${meal.name.toLowerCase()}`}>
+          {[{ id: null, label: meal.defaultLabel ?? 'Principal' }, ...meal.variants].map((v) => (
+            <button
+              key={v.id ?? 'principal'}
+              type="button"
+              role="radio"
+              aria-checked={variantId === v.id}
+              className={`variant__opt ${variantId === v.id ? 'variant__opt--on' : ''}`}
+              onClick={() => chooseVariant(date, meal.id, v.id)}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <ul className="items">
-        {meal.items.map((item) => (
+        {items.map((item) => (
           <MealItemRow key={item.id} item={item} onSwap={onSwap} />
         ))}
       </ul>
