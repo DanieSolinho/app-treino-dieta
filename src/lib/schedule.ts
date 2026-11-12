@@ -23,3 +23,19 @@ export function upcoming(from: Date, days: number, workouts: Workout[], schedule
     return { date: d, plan: plannedFor(d, workouts, schedule) };
   });
 }
+
+/** Letra curta da ficha: "Treino A · …" → "A". */
+export const shortName = (name: string) => name.match(/^Treino\s+(\S+)/)?.[1] ?? name.slice(0, 1);
+
+/** Dias do mês em semanas (domingo a sábado), com null nas casas antes do dia 1 e depois do último. */
+export function monthGrid(year: number, month: number): (Date | null)[][] {
+  const first = new Date(year, month, 1);
+  const days = new Date(year, month + 1, 0).getDate();
+  const cells: (Date | null)[] = Array.from({ length: first.getDay() }, () => null);
+  for (let d = 1; d <= days; d++) cells.push(new Date(year, month, d));
+  while (cells.length % 7) cells.push(null);
+  return Array.from({ length: cells.length / 7 }, (_, i) => cells.slice(i * 7, i * 7 + 7));
+}
+
+/** Último dia com agenda por data (para avisar quando está acabando). */
+export const lastScheduledDate = (schedule: Schedule): string | undefined => Object.keys(schedule).sort().pop();

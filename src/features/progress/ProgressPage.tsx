@@ -6,15 +6,22 @@ import { change, exerciseHistory, formatShortDate, measureSeries, personalRecord
 import { formatKg } from '../../lib/loadSuggestion';
 import { measureLabels, type MeasureKey } from '../../types/body';
 import { NewEntryDialog } from './NewEntryDialog';
+import { BadgesTab } from './BadgesTab';
 
-type Tab = 'peso' | 'medidas' | 'cargas';
+type Tab = 'peso' | 'medidas' | 'cargas' | 'medalhas';
 const tabs: { id: Tab; label: string }[] = [
   { id: 'peso', label: 'Peso' },
   { id: 'medidas', label: 'Medidas' },
   { id: 'cargas', label: 'Cargas' },
+  { id: 'medalhas', label: 'Medalhas' },
 ];
 
 const fmt = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+const weeksBetween = (a: string, b: string) => {
+  const days = Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
+  if (days < 14) return `${days} ${days === 1 ? 'dia' : 'dias'}`;
+  return `${Math.round(days / 7)} semanas`;
+};
 const signed = (n: number, unit: string) => `${n > 0 ? '+' : ''}${fmt(n)} ${unit}`;
 
 function WeightTab() {
@@ -153,6 +160,12 @@ function LoadsTab() {
             ))}
           </select>
         </label>
+        {series.length > 1 && (
+          <p className="muted" role="status">
+            {formatKg(series[0].value)} → {formatKg(series.at(-1)!.value)}
+            {change(series) ? ` (${signed(change(series)!, 'kg')})` : ''} em {weeksBetween(series[0].date, series.at(-1)!.date)}
+          </p>
+        )}
         <LineChart points={series} unit="kg" label={`Maior carga por treino em ${name(selected)}`} />
       </section>
     </>
@@ -185,6 +198,7 @@ export function ProgressPage() {
       {tab === 'peso' && <WeightTab />}
       {tab === 'medidas' && <MeasuresTab />}
       {tab === 'cargas' && <LoadsTab />}
+      {tab === 'medalhas' && <BadgesTab />}
 
       <NewEntryDialog open={adding} onClose={() => setAdding(false)} />
     </main>

@@ -15,6 +15,8 @@ interface WorkoutState {
 
   saveWorkout: (workout: Workout) => void;
   deleteWorkout: (id: string) => void;
+  /** Agenda de um dia: ids das fichas ([] = descanso) ou null = sem agenda (usa os dias da semana). */
+  setScheduleDay: (date: string, ids: string[] | null) => void;
 
   startSession: (workoutId: string) => void;
   logSet: (exerciseId: string, set: SetLog) => void;
@@ -49,6 +51,14 @@ export const useWorkoutStore = create<WorkoutState>()(
         }),
 
       deleteWorkout: (id) => set((s) => ({ workouts: s.workouts.filter((w) => w.id !== id) })),
+
+      setScheduleDay: (date, ids) =>
+        set((s) => {
+          const schedule = { ...s.schedule };
+          if (ids === null) delete schedule[date];
+          else schedule[date] = ids;
+          return { schedule };
+        }),
 
       startSession: (workoutId) =>
         set({ active: { id: newId(), workoutId, startedAt: new Date().toISOString(), logs: {} } }),

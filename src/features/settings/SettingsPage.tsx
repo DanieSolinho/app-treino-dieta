@@ -5,6 +5,7 @@ import { cloudEnabled } from '../../services/supabase';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { NumberStepper } from '../../components/ui/NumberStepper';
 import { ImportPlan } from './ImportPlan';
+import { downloadMyData } from '../../lib/exportData';
 
 function SyncCard() {
   const state = useSyncStatus((s) => s.state);
@@ -155,6 +156,20 @@ export function SettingsPage() {
         <div className="light-stepper">
           <NumberStepper label="Por dia" value={goal} step={250} min={500} format={liters} onChange={setGoal} />
         </div>
+      </section>
+
+      <section className="card stack-sm" aria-labelledby="data-title">
+        <h2 id="data-title" className="card__title">
+          Meus dados
+        </h2>
+        <p className="muted">Baixe tudo o que o app guarda sobre você (plano, treinos feitos, água, peso e medidas) num arquivo. Serve de backup.</p>
+        <button
+          type="button"
+          className="btn-sm btn-sm--outline"
+          onClick={() => downloadMyData(user ? { email: user.email, displayName: user.displayName } : undefined)}
+        >
+          Baixar meus dados
+        </button>
       </section>
 
       {cloudEnabled && user && <DangerZone />}

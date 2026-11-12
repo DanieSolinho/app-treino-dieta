@@ -2,17 +2,16 @@ import { useMemo } from 'react';
 import { useWorkoutStore } from '../../stores/useWorkoutStore';
 import { WEEKDAYS, formatWeekDays } from './weekdays';
 import { totalSeconds } from '../../data/stretchRoutines';
-import { plannedFor, upcoming } from '../../lib/schedule';
-
-/** Letra curta da ficha para a faixa da semana: "Treino A · …" → "A". */
-const shortName = (name: string) => name.match(/^Treino\s+(\S+)/)?.[1] ?? name.slice(0, 1);
+import { lastScheduledDate, plannedFor, shortName, upcoming } from '../../lib/schedule';
+import { toDateKey } from '../../lib/date';
 
 interface Props {
   onEdit: (id: string | null) => void; // null = nova ficha
   onStretch: (routineId: string) => void;
+  onAgenda: () => void;
 }
 
-export function WorkoutList({ onEdit, onStretch }: Props) {
+export function WorkoutList({ onEdit, onStretch, onAgenda }: Props) {
   const workouts = useWorkoutStore((s) => s.workouts);
   const startSession = useWorkoutStore((s) => s.startSession);
   const lastSession = useWorkoutStore((s) => s.sessions[0]);
@@ -21,6 +20,8 @@ export function WorkoutList({ onEdit, onStretch }: Props) {
   const week = useMemo(() => upcoming(new Date(), 7, workouts, schedule), [workouts, schedule]);
   const todayIds = useMemo(() => plannedFor(new Date(), workouts, schedule).workouts.map((w) => w.id), [workouts, schedule]);
   const hasPlan = week.some((d) => d.plan.fromSchedule || d.plan.workouts.length > 0);
+  const last = lastScheduledDate(schedule);
+  const endsSoon = last !== undefined && last < toDateKey(new Date(Date.now() + 7 * 864e5));
 
   return (
     <main className="page">
@@ -32,6 +33,19 @@ export function WorkoutList({ onEdit, onStretch }: Props) {
           </svg>
         </button>
       </header>
+
+      <div className="agenda-link">
+        <h2 className="section-title">Próximos dias</h2>
+        <button type="button" className="link-btn" onClick={onAgenda}>
+          Editar agenda
+        </button>
+      </div>
+      {endsSoon && (
+        <p className="note">
+          Sua agenda vai até {new Date(`${last}T12:00:00`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })}. Toque em Editar agenda para
+          marcar os próximos dias.
+        </p>
+      )}
 
       {hasPlan && (
         <section aria-label="Próximos 7 dias" className="week">

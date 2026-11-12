@@ -141,6 +141,16 @@ Em **Settings › Environment Variables**, cadastre `ANTHROPIC_API_KEY` e `SCAN_
 - PWA: `public/manifest.webmanifest`, ícones em `public/icons/` (fonte `icon.svg`) e `public/sw.js`, registrado só no build de produção. O service worker guarda as páginas e os arquivos do site para abrir sem internet; dados, login e fotos do Supabase não passam por ele.
 - No Supabase, **Authentication › URL Configuration**: Site URL = endereço da Vercel; Redirect URLs = endereço da Vercel e `http://localhost:5173`.
 
+## Agenda, motivação e meus dados
+
+- **Agenda** (Treinos › Editar agenda, `ScheduleEditor.tsx`): calendário do mês; toque no dia e escolha uma ou mais fichas, descanso, ou limpe o dia (aí vale o dia da semana da ficha). Avisa na lista de treinos quando a agenda está acabando.
+- **Motivação** (`src/lib/achievements.ts`), só com força e constância, nunca peso:
+  - ao finalizar um treino: recordes de carga e marcos (1º, 10º, 25º… treino);
+  - na tela Hoje, de segunda a quarta: resumo da semana passada (treinos, dias na meta de água, exercícios com carga maior);
+  - Progresso › Medalhas: total de treinos, semanas seguidas com 3+ treinos, dias seguidos de água e exercícios que evoluíram.
+- **Baixar meus dados** (Ajustes): arquivo JSON com tudo (backup e RGPD).
+- **E-mails em português**: modelos em `supabase/email-templates/`, colados no painel em Authentication › Email Templates.
+
 ## Importar plano (Ajustes › Plano)
 
 Quando chega dieta, treino ou agenda nova, o app recebe um arquivo `.json` (formato `treino-dieta-plano`, versão 1) com qualquer parte: `diet`, `workouts`, `schedule`, `stretches` e `images` (fotos .webp em base64).

@@ -4,6 +4,7 @@ import { formatLongDate, toDateKey } from '../../lib/date';
 import { WaterTracker } from './WaterTracker';
 import { useStreak } from './useStreak';
 import { TodayWorkoutCard } from './TodayWorkoutCard';
+import { WeekSummaryCard } from './WeekSummaryCard';
 
 const NO_MEALS: string[] = [];
 
@@ -40,6 +41,8 @@ export function TodayPage({ goTo }: Props) {
           {streak} {streak === 1 ? 'dia' : 'dias'}
         </span>
       </header>
+
+      <WeekSummaryCard />
 
       <TodayWorkoutCard goTo={goTo} />
 

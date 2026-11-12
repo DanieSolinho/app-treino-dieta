@@ -5,12 +5,14 @@ import { WorkoutForm } from './WorkoutForm';
 import { ActiveWorkout } from './ActiveWorkout';
 import { SessionSummary } from './SessionSummary';
 import { StretchPlayer } from './StretchPlayer';
+import { ScheduleEditor } from './ScheduleEditor';
 
 type View =
   | { kind: 'list' }
   | { kind: 'edit'; id: string | null }
   | { kind: 'summary'; sessionId: string }
-  | { kind: 'stretch'; routineId: string };
+  | { kind: 'stretch'; routineId: string }
+  | { kind: 'agenda' };
 
 /** Navegação interna da aba Treinos. O treino em andamento tem prioridade sobre tudo. */
 export function WorkoutsFeature() {
@@ -21,6 +23,7 @@ export function WorkoutsFeature() {
 
   if (hasActive) return <ActiveWorkout onFinished={(sessionId) => setView({ kind: 'summary', sessionId })} />;
   if (view.kind === 'edit') return <WorkoutForm workoutId={view.id} onDone={back} />;
+  if (view.kind === 'agenda') return <ScheduleEditor onDone={back} />;
   if (view.kind === 'summary') return <SessionSummary sessionId={view.sessionId} onClose={back} />;
   if (view.kind === 'stretch') {
     const routine = stretchRoutines.find((r) => r.id === view.routineId);
@@ -30,6 +33,7 @@ export function WorkoutsFeature() {
     <WorkoutList
       onEdit={(id) => setView({ kind: 'edit', id })}
       onStretch={(routineId) => setView({ kind: 'stretch', routineId })}
+      onAgenda={() => setView({ kind: 'agenda' })}
     />
   );
 }
