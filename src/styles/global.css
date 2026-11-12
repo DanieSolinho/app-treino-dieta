@@ -462,4 +462,37 @@ fieldset.field > legend { margin-bottom: 8px; }
 .scan__disclaimer { font-size: 12px; }
 .note--warn { background: #fff4e5; color: #7a4a00; }
 
+/* Login */
+.auth {
+  max-width: 420px; margin: 0 auto; min-height: 100dvh; padding: 48px 20px 32px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.auth--loading { align-items: center; justify-content: center; }
+.auth__brand { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.auth__logo {
+  width: 48px; height: 48px; border-radius: 14px; background: var(--ink); color: var(--lime);
+  display: flex; align-items: center; justify-content: center;
+}
+.auth__app { margin: 0; font-family: var(--font-display); font-size: 18px; font-weight: 700; }
+.auth__form { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+.auth__form .btn { margin-top: 6px; }
+.auth__hint { margin-top: -6px; font-size: 12px; }
+.auth__links { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 8px; text-align: center; }
+.password { position: relative; }
+.password .input { padding-right: 88px; }
+.password__toggle {
+  position: absolute; right: 4px; top: 4px; bottom: 4px; padding: 0 12px; border: none;
+  border-radius: 8px; background: none; color: var(--brand); font-size: 13px; font-weight: 600;
+}
+.btn:disabled { opacity: 0.6; cursor: wait; }
+
+/* Ajustes */
+.account__name { margin: 0 0 2px; font-weight: 600; }
+.account__signout { flex: 0 0 auto; align-self: flex-start; padding: 0 16px; }
+.danger { border: 2px solid #f1c0bc; display: flex; flex-direction: column; gap: 12px; }
+.btn-sm--danger { background: #b3261e; color: #fff; }
+.light-stepper .stepper { background: var(--line); }
+.light-stepper .stepper__btn { background: var(--surface); color: var(--ink); }
+.light-stepper .stepper__label { color: var(--muted); }
+
 :focus-visible { outline: 3px solid var(--water); outline-offset: 2px; }

@@ -82,6 +82,8 @@ cp .env.example .env.local   # URL e chave publicável do Supabase (públicas po
 
 Sem o `.env.local`, o app funciona como antes, só no aparelho.
 
+**Login** (`src/services/auth.ts` + `src/features/auth/`): criar conta com confirmação por e-mail, entrar, sair, esqueci minha senha → nova senha, e apagar conta em Ajustes. Erros do Supabase traduzidos pelos códigos (`invalid_credentials`, `email_not_confirmed`…). No painel do Supabase, **Authentication › URL Configuration** precisa ter o endereço do app em Site URL e Redirect URLs.
+
 ## Back-end: escanear rótulo (`api/analyze-label.ts`)
 
 Na troca de um alimento, "Tem outro alimento?" tira uma foto do rótulo (ou do alimento) e calcula quanto dá para comer no lugar da porção do plano.

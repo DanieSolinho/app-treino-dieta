@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { AuthGate } from './features/auth/AuthGate';
+import { SettingsPage } from './features/settings/SettingsPage';
+import { cloudEnabled } from './services/supabase';
 import { DietPage } from './features/diet/DietPage';
 import { TodayPage } from './features/today/TodayPage';
 import { WorkoutsFeature } from './features/workouts/WorkoutsFeature';
@@ -18,18 +21,17 @@ const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: 'ajustes', label: 'Ajustes', icon: 'M4 7h9M17 7h3M4 17h3M11 17h9' },
 ];
 
-function ComingSoon({ title }: { title: string }) {
+/** Com o Supabase configurado, só entra quem fez login. Sem ele, o app roda só no aparelho. */
+export default function App() {
   return (
-    <main className="page">
-      <h1 className="page__title">{title}</h1>
-      <p className="muted">Essa tela entra nas próximas etapas do roadmap.</p>
-    </main>
+    <AuthGate enabled={cloudEnabled}>
+      <MainApp />
+    </AuthGate>
   );
 }
 
-export default function App() {
+function MainApp() {
   const [tab, setTab] = useState<Tab>('hoje');
-  const current = tabs.find((t) => t.id === tab)!;
 
   return (
     <div className="app">
@@ -37,7 +39,7 @@ export default function App() {
       {tab === 'dieta' && <DietPage />}
       {tab === 'treinos' && <WorkoutsFeature />}
       {tab === 'progresso' && <ProgressPage />}
-      {tab === 'ajustes' && <ComingSoon title={current.label} />}
+      {tab === 'ajustes' && <SettingsPage />}
 
       <nav className="nav" aria-label="Navegação principal">
         {tabs.map((t) => (
