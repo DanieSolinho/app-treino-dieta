@@ -58,6 +58,30 @@ src/
 - `useDayStore.swaps[data][itemId]` guarda o alimento escolhido no dia.
 - O hook `useFoodForDay(item)` devolve a troca, se existir, ou o alimento original — os componentes não precisam saber se houve troca.
 
+## Banco de dados e login (Supabase)
+
+Postgres no Supabase (região UE, Paris), com login por e-mail e senha.
+
+| Tabela | O que guarda |
+| --- | --- |
+| `profiles` | nome e meta de água (criado sozinho no cadastro) |
+| `diet_plans` | plano alimentar (documento JSON) |
+| `workout_plans` | fichas, agenda e alongamentos (documento JSON) |
+| `workout_sessions` | cada treino feito |
+| `day_logs` | um dia: refeições feitas, água, trocas |
+| `body_entries` | peso e medidas |
+
+- **RLS em todas as tabelas:** cada usuária só lê e escreve as próprias linhas; visitantes sem login não acessam nada.
+- **`delete_my_account()`:** apaga a conta e, em cascata, todos os dados (RGPD).
+- **Migrações versionadas** em `supabase/migrations/`: o banco pode ser recriado em qualquer Postgres.
+- **Acesso concentrado em `src/services/`:** as telas não falam com o Supabase direto.
+
+```bash
+cp .env.example .env.local   # URL e chave publicável do Supabase (públicas por natureza)
+```
+
+Sem o `.env.local`, o app funciona como antes, só no aparelho.
+
 ## Back-end: escanear rótulo (`api/analyze-label.ts`)
 
 Na troca de um alimento, "Tem outro alimento?" tira uma foto do rótulo (ou do alimento) e calcula quanto dá para comer no lugar da porção do plano.
