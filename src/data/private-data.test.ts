@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultPlan, defaultSchedule, defaultWorkouts, imageUrl, stretchRoutines, usingPrivateData } from '.';
+import { defaultPlan, defaultSchedule, defaultWorkouts, bundledImageUrl, defaultStretches, usingPrivateData } from '.';
 import { plannedFor } from '../lib/schedule';
 
 // Só roda quando src/data/private/ existe (no seu computador). No GitHub é pulado.
@@ -19,18 +19,18 @@ describe.skipIf(!usingPrivateData)('dados pessoais', () => {
 
   it('toda ficha aponta para um alongamento que existe', () => {
     for (const w of defaultWorkouts) {
-      expect(stretchRoutines.some((r) => r.id === w.stretchRoutineId)).toBe(true);
+      expect(defaultStretches.some((r) => r.id === w.stretchRoutineId)).toBe(true);
       for (const ex of w.exercises) expect(ex.setTargets?.length).toBe(ex.sets);
     }
   });
 
   it('todo exercício, ativação e alongamento tem foto', () => {
     for (const w of defaultWorkouts) {
-      expect(imageUrl(w.warmupImage), w.warmupImage).toBeTruthy();
-      for (const ex of w.exercises) expect(imageUrl(ex.image), ex.image).toBeTruthy();
+      expect(bundledImageUrl(w.warmupImage), w.warmupImage).toBeTruthy();
+      for (const ex of w.exercises) expect(bundledImageUrl(ex.image), ex.image).toBeTruthy();
       for (const c of w.cardio ?? []) expect(c.afterExercise).toBeLessThanOrEqual(w.exercises.length);
     }
-    for (const r of stretchRoutines) for (const s of r.steps) expect(imageUrl(s.image), s.image).toBeTruthy();
+    for (const r of defaultStretches) for (const s of r.steps) expect(bundledImageUrl(s.image), s.image).toBeTruthy();
   });
 
   it('todo grupo citado na dieta existe na lista de substituição', () => {

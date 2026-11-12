@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useWorkoutStore } from '../../stores/useWorkoutStore';
-import { defaultSchedule } from '../../data';
 import { plannedFor } from '../../lib/schedule';
 
 interface Props {
@@ -11,7 +10,8 @@ export function TodayWorkoutCard({ goTo }: Props) {
   const workouts = useWorkoutStore((s) => s.workouts);
   const activeName = useWorkoutStore((s) => s.workouts.find((w) => w.id === s.active?.workoutId)?.name);
   const startSession = useWorkoutStore((s) => s.startSession);
-  const plan = useMemo(() => plannedFor(new Date(), workouts, defaultSchedule), [workouts]);
+  const schedule = useWorkoutStore((s) => s.schedule);
+  const plan = useMemo(() => plannedFor(new Date(), workouts, schedule), [workouts, schedule]);
 
   if (activeName) {
     return (

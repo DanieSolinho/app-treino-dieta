@@ -1,5 +1,6 @@
 import type { DietPlan, Food } from '../../types/diet';
-import type { Workout, WorkoutSession } from '../../types/workout';
+import type { Schedule, Workout, WorkoutSession } from '../../types/workout';
+import type { StretchRoutine } from '../../data/stretchRoutines';
 import type { BodyEntry } from '../../types/body';
 
 /** Um dia do app, como ele é guardado no servidor (uma linha por data). */
@@ -11,10 +12,17 @@ export interface DayRecord {
   variants: Record<string, string>;
 }
 
+/** Fichas, agenda e alongamentos: ficam juntos numa linha (workout_plans). */
+export interface WorkoutPlan {
+  workouts: Workout[];
+  schedule?: Schedule; // ausente = ainda não há agenda salva
+  stretches?: StretchRoutine[]; // ausente = ainda não há alongamentos salvos
+}
+
 /** Tudo o que existe no servidor para a usuária logada. */
 export interface RemoteSnapshot {
   diet?: DietPlan; // ausente = ainda não há plano salvo
-  workouts?: Workout[];
+  workouts?: WorkoutPlan;
   sessions: WorkoutSession[];
   days: DayRecord[];
   body: BodyEntry[];
@@ -24,7 +32,7 @@ export interface RemoteSnapshot {
 /** O que mudou no aparelho e precisa subir. */
 export interface PushBatch {
   diet?: DietPlan;
-  workouts?: Workout[];
+  workouts?: Required<WorkoutPlan>;
   sessions: WorkoutSession[];
   days: DayRecord[];
   body: BodyEntry[];
@@ -45,7 +53,7 @@ export interface SyncApi {
 /** O que está pendente de envio (sobrevive a fechar o app). */
 export interface Dirty {
   diet: boolean;
-  workouts: boolean;
+  workouts: boolean; // fichas, agenda e alongamentos
   settings: boolean;
   sessions: string[]; // ids
   days: string[]; // datas

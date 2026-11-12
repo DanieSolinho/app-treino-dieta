@@ -3,7 +3,7 @@ import type { Effort, Exercise, SetLog } from '../../types/workout';
 import { effortLabel, previousLogs, useWorkoutStore } from '../../stores/useWorkoutStore';
 import { NumberStepper } from '../../components/ui/NumberStepper';
 import { formatKg, targetReps } from '../../lib/loadSuggestion';
-import { imageUrl, stretchRoutines } from '../../data';
+import { useImage } from '../../services/images';
 import { CardioCard } from './CardioCard';
 import { StretchPlayer } from './StretchPlayer';
 import { mmss, useCountdown } from '../../hooks/useCountdown';
@@ -77,6 +77,7 @@ export function ActiveWorkout({ onFinished }: Props) {
   const sessions = useWorkoutStore((s) => s.sessions);
   const { logSet, undoSet, cancelSession, finishSession, logCardio } = useWorkoutStore.getState();
   const rest = useCountdown();
+  const stretchRoutines = useWorkoutStore((s) => s.stretches);
 
   // começa no primeiro exercício ainda incompleto
   const [index, setIndex] = useState(() =>
@@ -97,6 +98,10 @@ export function ActiveWorkout({ onFinished }: Props) {
   const ex = workout?.exercises[index];
   const done = (ex && active?.logs[ex.id]) || NO_SETS;
 
+  // hooks antes de qualquer return
+  const photo = useImage(ex?.image);
+  const warmupPhoto = useImage(workout?.warmupImage);
+
   if (!active || !workout || !ex) return null;
 
   const stretch = stretchRoutines.find((r) => r.id === workout.stretchRoutineId);
@@ -112,8 +117,6 @@ export function ActiveWorkout({ onFinished }: Props) {
     ? workout.cardio?.find((c) => c.afterExercise === index + 1 && active.cardio?.[c.afterExercise] === undefined)
     : undefined;
   const cardioTotal = workout.cardio?.length ?? 0;
-  const photo = imageUrl(ex.image);
-  const warmupPhoto = imageUrl(workout.warmupImage);
 
   function log(set: SetLog) {
     logSet(ex!.id, set);

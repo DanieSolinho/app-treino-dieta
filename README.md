@@ -95,6 +95,14 @@ Offline primeiro: o app lê e grava no aparelho, e o motor envia só o que mudou
 - Conflito: vale o último envio, mas o que está pendente no aparelho nunca é sobrescrito.
 - Sair envia o que falta e limpa o aparelho; outra conta no mesmo navegador não vê nada da anterior.
 - `engine.ts` não conhece o Supabase: recebe um `SyncApi` (real em `supabaseApi.ts`, falso nos testes).
+- Fichas, agenda e alongamentos sobem juntos (`workout_plans`). Agenda/alongamentos vazios no servidor não apagam os que vieram com o app. `sync-meta.version` (v2) faz o aparelho que já sincronizava reenviar agenda e alongamentos uma vez.
+
+### Fotos (`src/services/images.ts`)
+
+- Bucket **privado** `exercise-images` no Supabase Storage, uma pasta por conta (`<id>/<nome>.webp`); só a dona lê ou altera (`supabase/migrations/…_exercise_images.sql`).
+- No computador com `src/data/private/images`, o app mostra a foto local e, depois de sincronizar, envia as que faltam na conta.
+- Nos outros aparelhos, `useImage(nome)` pede links temporários assinados (7 dias, em lote) e guarda no aparelho.
+- Apagar a conta apaga as fotos antes.
 
 ## Back-end: escanear rótulo (`api/analyze-label.ts`)
 

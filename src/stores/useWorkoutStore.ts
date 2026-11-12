@@ -1,12 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Effort, SetLog, Suggestion, Workout, WorkoutSession } from '../types/workout';
-import { defaultWorkouts } from '../data';
+import type { Effort, Schedule, SetLog, Suggestion, Workout, WorkoutSession } from '../types/workout';
+import type { StretchRoutine } from '../data/stretchRoutines';
+import { defaultSchedule, defaultStretches, defaultWorkouts } from '../data';
 import { suggestLoad } from '../lib/loadSuggestion';
 import { newId } from '../lib/id';
 
 interface WorkoutState {
   workouts: Workout[];
+  schedule: Schedule; // agenda por data
+  stretches: StretchRoutine[]; // rotinas de alongamento
   sessions: WorkoutSession[]; // finalizadas, mais recente primeiro
   active: WorkoutSession | null; // treino em andamento (sobrevive a um refresh)
 
@@ -32,6 +35,8 @@ export const useWorkoutStore = create<WorkoutState>()(
   persist(
     (set, get) => ({
       workouts: defaultWorkouts,
+      schedule: defaultSchedule,
+      stretches: defaultStretches,
       sessions: [],
       active: null,
 
@@ -100,7 +105,7 @@ export const useWorkoutStore = create<WorkoutState>()(
       // v2 trouxe as fichas reais: troca as fichas de exemplo e mantém o histórico
       migrate: (saved) => {
         const s = (saved ?? {}) as Partial<WorkoutState>;
-        return { workouts: defaultWorkouts, sessions: s.sessions ?? [], active: null } as unknown as WorkoutState;
+        return { workouts: defaultWorkouts, schedule: defaultSchedule, stretches: defaultStretches, sessions: s.sessions ?? [], active: null } as unknown as WorkoutState;
       },
     },
   ),

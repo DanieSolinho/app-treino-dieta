@@ -2,7 +2,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../database.types';
 import type { DietPlan } from '../../types/diet';
-import type { Workout } from '../../types/workout';
+import type { Schedule, Workout } from '../../types/workout';
+import type { StretchRoutine } from '../../data/stretchRoutines';
 import type { SyncApi } from './types';
 import { bodyToRow, dayToRow, rowToBody, rowToDay, rowToSession, sessionToRow } from './rows';
 
@@ -33,6 +34,12 @@ async function selectAll<T extends TableName>(db: Client, table: T, userId: stri
   }
 }
 
+/** {} ou [] no servidor = ainda não foi salvo. */
+function nonEmpty<T extends object>(value: T | null | undefined): T | undefined {
+  if (!value) return undefined;
+  return Object.keys(value).length ? value : undefined;
+}
+
 export function supabaseSyncApi(db: Client): SyncApi {
   return {
     async hasData(userId) {
@@ -50,7 +57,7 @@ export function supabaseSyncApi(db: Client): SyncApi {
     async pull(userId) {
       const [diet, plans, profile, sessions, days, body] = await Promise.all([
         db.from('diet_plans').select('plan').eq('user_id', userId).maybeSingle(),
-        db.from('workout_plans').select('workouts').eq('user_id', userId).maybeSingle(),
+        db.from('workout_plans').select('workouts, schedule, stretches').eq('user_id', userId).maybeSingle(),
         db.from('profiles').select('water_goal_ml').eq('id', userId).maybeSingle(),
         selectAll(db, 'workout_sessions', userId, 'started_at'),
         selectAll(db, 'day_logs', userId, 'date'),
@@ -61,7 +68,13 @@ export function supabaseSyncApi(db: Client): SyncApi {
       const profileRow = check(profile);
       return {
         diet: dietRow ? (dietRow.plan as unknown as DietPlan) : undefined,
-        workouts: planRow ? (planRow.workouts as unknown as Workout[]) : undefined,
+        workouts: planRow
+          ? {
+              workouts: planRow.workouts as unknown as Workout[],
+              schedule: nonEmpty(planRow.schedule as unknown as Schedule),
+              stretches: nonEmpty(planRow.stretches as unknown as StretchRoutine[]),
+            }
+          : undefined,
         waterGoalMl: profileRow?.water_goal_ml,
         sessions: sessions.map(rowToSession),
         days: days.map(rowToDay),
@@ -75,7 +88,14 @@ export function supabaseSyncApi(db: Client): SyncApi {
         jobs.push(Promise.resolve(q).then((r) => check({ data: null, error: r.error })));
 
       if (b.diet) run(db.from('diet_plans').upsert({ user_id: userId, plan: b.diet as never }, { onConflict: 'user_id' }));
-      if (b.workouts) run(db.from('workout_plans').upsert({ user_id: userId, workouts: b.workouts as never }, { onConflict: 'user_id' }));
+      if (b.workouts) {
+        const { workouts, schedule, stretches } = b.workouts;
+        run(
+          db
+            .from('workout_plans')
+            .upsert({ user_id: userId, workouts: workouts as never, schedule: schedule as never, stretches: stretches as never }, { onConflict: 'user_id' }),
+        );
+      }
       if (b.waterGoalMl !== undefined) run(db.from('profiles').update({ water_goal_ml: b.waterGoalMl }).eq('id', userId));
       if (b.sessions.length) run(db.from('workout_sessions').upsert(b.sessions.map((s) => sessionToRow(userId, s)), { onConflict: 'id' }));
       if (b.days.length) run(db.from('day_logs').upsert(b.days.map((d) => dayToRow(userId, d)), { onConflict: 'user_id,date' }));

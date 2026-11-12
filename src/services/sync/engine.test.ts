@@ -81,7 +81,7 @@ describe('sincronização', () => {
 
     const u = server.user('dani');
     expect(u.diet?.title).toBe(samplePlan.title);
-    expect(u.workouts).toHaveLength(sampleWorkouts.length);
+    expect(u.workouts?.workouts).toHaveLength(sampleWorkouts.length);
     expect(u.sessions.map((s) => s.id)).toEqual(['s1']);
     expect(u.days).toEqual([{ date: '2026-11-12', mealsDone: [], waterLog: [500], swaps: {}, variants: {} }]);
     expect(u.body[0]).toMatchObject({ date: '2026-11-10', weightKg: 68.4 });
@@ -215,5 +215,47 @@ describe('troca de conta', () => {
     expect(useDietStore.getState().plan.title).toBe('Plano da Bia');
     expect(server.user('bia').days).toHaveLength(0); // nada da Dani subiu para a Bia
     expect(useSyncMeta.getState().owner).toBe('bia');
+  });
+
+  it('agenda e alongamentos vão junto com as fichas e chegam no outro aparelho', async () => {
+    const schedule = { '2026-11-12': ['treino-a'] };
+    const stretches = [{ id: 'inf', name: 'Inferiores', steps: [{ name: 'Gato', seconds: 30 }] }] as never;
+    useWorkoutStore.setState({ schedule, stretches });
+    await engine.start('dani');
+    expect(server.user('dani').workouts).toMatchObject({ schedule, stretches });
+
+    // celular: sem nada embutido, recebe tudo da conta
+    engine.stop();
+    resetLocalData();
+    useWorkoutStore.setState({ schedule: {}, stretches: [] });
+    engine = createEngine(server.api, { debounceMs: 0 });
+    await engine.start('dani');
+    expect(useWorkoutStore.getState().schedule).toEqual(schedule);
+    expect(useWorkoutStore.getState().stretches).toEqual(stretches);
+  });
+
+  it('agenda vazia no servidor não apaga a agenda que veio com o app', async () => {
+    server.user('dani').workouts = { workouts: sampleWorkouts };
+    const schedule = { '2026-11-12': ['treino-a'] };
+    useWorkoutStore.setState({ schedule });
+    await engine.start('dani');
+    expect(useWorkoutStore.getState().schedule).toEqual(schedule);
+  });
+
+  it('aparelho que já sincronizava antes (v1) sobe agenda e alongamentos uma vez', async () => {
+    server.user('dani').workouts = { workouts: sampleWorkouts };
+    useSyncMeta.setState({ owner: 'dani', version: undefined });
+    const schedule = { '2026-11-12': ['treino-a'] };
+    useWorkoutStore.setState({ schedule });
+    await engine.start('dani');
+    expect(server.user('dani').workouts?.schedule).toEqual(schedule);
+    expect(useSyncMeta.getState().version).toBe(2);
+
+    // na próxima abertura não reenvia
+    engine.stop();
+    const before = server.pushes.length;
+    engine = createEngine(server.api, { debounceMs: 0 });
+    await engine.start('dani');
+    expect(server.pushes.length).toBe(before);
   });
 });

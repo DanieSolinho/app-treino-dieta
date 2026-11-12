@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useWorkoutStore } from '../../stores/useWorkoutStore';
-import { stretchRoutines } from '../../data';
 import { WorkoutList } from './WorkoutList';
 import { WorkoutForm } from './WorkoutForm';
 import { ActiveWorkout } from './ActiveWorkout';
@@ -16,6 +15,7 @@ type View =
 /** Navegação interna da aba Treinos. O treino em andamento tem prioridade sobre tudo. */
 export function WorkoutsFeature() {
   const hasActive = useWorkoutStore((s) => s.active !== null);
+  const stretchRoutines = useWorkoutStore((s) => s.stretches);
   const [view, setView] = useState<View>({ kind: 'list' });
   const back = () => setView({ kind: 'list' });
 

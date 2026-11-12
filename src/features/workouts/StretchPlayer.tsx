@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { expandSteps, type StretchRoutine } from '../../data/stretchRoutines';
 import { ProgressRing } from '../../components/ui/ProgressRing';
 import { mmss } from '../../hooks/useCountdown';
-import { imageUrl } from '../../data';
+import { useImage } from '../../services/images';
 
 interface Props {
   routine: StretchRoutine;
@@ -21,6 +21,7 @@ export function StretchPlayer({ routine, onClose }: Props) {
   const [paused, setPaused] = useState(false);
   const finished = index >= steps.length;
   const step = steps[Math.min(index, steps.length - 1)];
+  const photo = useImage(step.image);
   const timed = step.seconds !== undefined;
 
   useEffect(() => {
@@ -62,7 +63,6 @@ export function StretchPlayer({ routine, onClose }: Props) {
   }
 
   const next = steps[index + 1];
-  const photo = imageUrl(step.image);
 
   return (
     <div className="active">

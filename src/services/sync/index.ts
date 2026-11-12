@@ -4,12 +4,18 @@ import { deleteAccount as deleteAccountRemote, signOut as signOutRemote, type Re
 import { createEngine, resetLocalData, useSyncMeta, useSyncStatus, type Engine } from './engine';
 import { supabaseSyncApi } from './supabaseApi';
 import { isDirty, pendingCount } from './types';
+import { clearImageLinks, deleteMyImages, uploadBundledImages } from '../images';
 
 export { useSyncMeta, useSyncStatus, pendingCount };
 
 const engine: Engine | null = supabase ? createEngine(supabaseSyncApi(supabase)) : null;
 
-export const startSync = (userId: string) => engine?.start(userId) ?? Promise.resolve();
+/** Liga a sincronização e, em seguida, envia as fotos que este aparelho tem e a conta ainda não. */
+export async function startSync(userId: string) {
+  if (!engine) return;
+  await engine.start(userId);
+  void uploadBundledImages(userId).catch(() => {}); // sem internet: tenta na próxima abertura
+}
 export const stopSync = () => engine?.stop();
 export const syncNow = () => engine?.syncNow({ pull: true }) ?? Promise.resolve(false);
 
@@ -30,13 +36,18 @@ export async function signOutAndClear(): Promise<Result> {
   if (!r.ok) return r;
   engine?.stop();
   resetLocalData();
+  clearImageLinks();
   return { ok: true };
 }
 
 export async function deleteAccountAndClear(): Promise<Result> {
+  // as fotos ficam no armazenamento de arquivos, fora das tabelas: apaga antes da conta
+  const photos = await deleteMyImages();
+  if (!photos.ok) return photos;
   const r = await deleteAccountRemote();
   if (!r.ok) return r;
   engine?.stop();
   resetLocalData();
+  clearImageLinks();
   return { ok: true };
 }

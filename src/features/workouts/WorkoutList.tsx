@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useWorkoutStore } from '../../stores/useWorkoutStore';
 import { WEEKDAYS, formatWeekDays } from './weekdays';
 import { totalSeconds } from '../../data/stretchRoutines';
-import { defaultSchedule, stretchRoutines } from '../../data';
 import { plannedFor, upcoming } from '../../lib/schedule';
 
 /** Letra curta da ficha para a faixa da semana: "Treino A · …" → "A". */
@@ -17,8 +16,10 @@ export function WorkoutList({ onEdit, onStretch }: Props) {
   const workouts = useWorkoutStore((s) => s.workouts);
   const startSession = useWorkoutStore((s) => s.startSession);
   const lastSession = useWorkoutStore((s) => s.sessions[0]);
-  const week = useMemo(() => upcoming(new Date(), 7, workouts, defaultSchedule), [workouts]);
-  const todayIds = useMemo(() => plannedFor(new Date(), workouts, defaultSchedule).workouts.map((w) => w.id), [workouts]);
+  const schedule = useWorkoutStore((s) => s.schedule);
+  const stretchRoutines = useWorkoutStore((s) => s.stretches);
+  const week = useMemo(() => upcoming(new Date(), 7, workouts, schedule), [workouts, schedule]);
+  const todayIds = useMemo(() => plannedFor(new Date(), workouts, schedule).workouts.map((w) => w.id), [workouts, schedule]);
   const hasPlan = week.some((d) => d.plan.fromSchedule || d.plan.workouts.length > 0);
 
   return (

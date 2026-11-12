@@ -22,8 +22,15 @@ import { emptyDirty, isDirty, type DayRecord, type Dirty, type PushBatch, type R
 // Estado
 // ---------------------------------------------------------------------------
 
+/**
+ * Versão do formato sincronizado. Ao subir de versão, o aparelho que já conhecia a conta
+ * reenvia o que passou a ser sincronizado (v2: agenda e alongamentos).
+ */
+export const SYNC_VERSION = 2;
+
 interface SyncMeta {
   owner?: string; // id da conta dona dos dados deste aparelho
+  version?: number; // ausente = 1
   dirty: Dirty;
   lastSyncedAt?: string;
 }
@@ -93,7 +100,7 @@ function watchStores(): () => void {
     useWorkoutStore.subscribe((s, p) => {
       if (applyingRemote) return;
       let changed = false;
-      if (s.workouts !== p.workouts) {
+      if (s.workouts !== p.workouts || s.schedule !== p.schedule || s.stretches !== p.stretches) {
         markDirty((d) => ({ ...d, workouts: true }));
         changed = true;
       }
@@ -161,7 +168,7 @@ function buildBatch(d: Dirty): PushBatch {
   const day = useDayStore.getState();
   return {
     diet: d.diet ? useDietStore.getState().plan : undefined,
-    workouts: d.workouts ? workout.workouts : undefined,
+    workouts: d.workouts ? { workouts: workout.workouts, schedule: workout.schedule, stretches: workout.stretches } : undefined,
     waterGoalMl: d.settings ? useSettingsStore.getState().waterGoalMl : undefined,
     sessions: workout.sessions.filter((s) => d.sessions.includes(s.id)),
     days: d.days.map((date) => dayRecord(day, date)),
@@ -188,7 +195,11 @@ export function applyRemote(remote: RemoteSnapshot) {
   applyingRemote = true;
   try {
     if (remote.diet && !d.diet) useDietStore.setState({ plan: remote.diet });
-    if (remote.workouts && !d.workouts) useWorkoutStore.setState({ workouts: remote.workouts });
+    if (remote.workouts && !d.workouts) {
+      const { workouts, schedule, stretches } = remote.workouts;
+      // agenda/alongamentos vazios no servidor não apagam os que vieram com o app
+      useWorkoutStore.setState({ workouts, ...(schedule && { schedule }), ...(stretches && { stretches }) });
+    }
     if (remote.waterGoalMl !== undefined && !d.settings) useSettingsStore.setState({ waterGoalMl: remote.waterGoalMl });
 
     // treinos feitos: os do servidor + os locais ainda não enviados
@@ -234,7 +245,7 @@ export function resetLocalData() {
   } finally {
     applyingRemote = false;
   }
-  useSyncMeta.setState({ owner: undefined, dirty: emptyDirty(), lastSyncedAt: undefined });
+  useSyncMeta.setState({ owner: undefined, version: undefined, dirty: emptyDirty(), lastSyncedAt: undefined });
 }
 
 // ---------------------------------------------------------------------------
@@ -337,10 +348,13 @@ export function createEngine(api: SyncApi, { debounceMs = 1500 } = {}): Engine {
           const remoteHasData = await api.hasData(id);
           if (remoteHasData) useSyncMeta.setState({ dirty: emptyDirty() }); // o servidor manda
           else markEverythingDirty(); // conta vazia: sobe o que já existe aqui
+        } else if ((meta.version ?? 1) < 2) {
+          // este aparelho já sincronizava antes da v2: sobe agenda e alongamentos uma vez
+          useSyncMeta.setState((m) => ({ dirty: { ...m.dirty, workouts: true } }));
         }
         lastPull = Date.now();
         const ok = await syncNow({ pull: true });
-        if (ok && userId === id) useSyncMeta.setState({ owner: id });
+        if (ok && userId === id) useSyncMeta.setState({ owner: id, version: SYNC_VERSION });
       } catch {
         useSyncStatus.setState({ state: 'offline' });
       } finally {
