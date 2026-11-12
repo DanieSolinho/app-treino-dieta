@@ -127,11 +127,17 @@ cp .env.example .env.local   # preencha ANTHROPIC_API_KEY e SCAN_ACCESS_CODE
 npm run dev                  # o Vite serve /api localmente (plugin em vite.config.ts)
 ```
 
-### Publicar na Vercel
+### Escanear rótulo na Vercel (quando for ativar)
 
-1. Entre em vercel.com com a conta do GitHub e importe o repositório (detecta Vite sozinho).
-2. Em **Settings › Environment Variables**, cadastre `ANTHROPIC_API_KEY` e `SCAN_ACCESS_CODE`.
-3. Deploy. A pasta `api/` vira função automaticamente.
+Em **Settings › Environment Variables**, cadastre `ANTHROPIC_API_KEY` e `SCAN_ACCESS_CODE` e faça um novo deploy. Sem elas, a função responde que o recurso não está configurado.
+
+## Publicar (Vercel) e instalar no celular (PWA)
+
+- `vercel.json`: build do Vite, saída em `dist`, `sw.js` sem cache e `/assets` com cache longo.
+- `.env.production`: URL e chave **publishable** do Supabase (públicas por definição; o RLS protege os dados). Nada secreto vai nesse arquivo.
+- A Vercel monta o app a partir do GitHub, então **sem** `src/data/private`: o site publicado não contém a dieta, as fichas nem as fotos. Tudo isso chega pela conta depois do login (sincronização + fotos privadas).
+- PWA: `public/manifest.webmanifest`, ícones em `public/icons/` (fonte `icon.svg`) e `public/sw.js`, registrado só no build de produção. O service worker guarda as páginas e os arquivos do site para abrir sem internet; dados, login e fotos do Supabase não passam por ele.
+- No Supabase, **Authentication › URL Configuration**: Site URL = endereço da Vercel; Redirect URLs = endereço da Vercel e `http://localhost:5173`.
 
 ## Dados pessoais (fora do Git)
 
