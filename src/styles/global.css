@@ -563,3 +563,12 @@ fieldset.field > legend { margin-bottom: 8px; }
 .badge-item__text small { font-size: 12px; }
 .badge-item--on .badge-item__text small { color: #b9c2bd; }
 .badge-item__progress { font-size: 12px; font-weight: 600; white-space: nowrap; }
+
+/* Modo demonstração */
+.demo-bar {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 16px; background: var(--lime); color: var(--ink); font-size: 13px;
+}
+.demo-bar__btn { border: 1px solid var(--ink); background: none; color: var(--ink); border-radius: 10px; padding: 4px 12px; font-size: 13px; font-weight: 600; }
+.auth__demo { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; padding-top: 16px; border-top: 1px solid var(--line); width: 100%; }
+.auth__demo .btn-sm { flex: none; width: 100%; max-width: 280px; }

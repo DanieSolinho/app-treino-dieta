@@ -1,30 +1,30 @@
 # Treino & Dieta
 
-App web mobile-first que junta treino, alongamento, dieta e água num só lugar.
+App mobile-first (PWA) que junta **treino com sugestão de carga, alongamento, dieta com substituições e água** num só lugar, com login e sincronização entre aparelhos.
 
-## O que já funciona
+**[Abrir o app](https://app-treino-dieta-omega.vercel.app)** → toque em **Ver demonstração** para conhecer com dados de exemplo, sem criar conta.
 
-**Treinos com sugestão de carga**
-- Fichas com exercícios, séries, faixa de reps, descanso e incremento — criar, editar e apagar
-- Treino em andamento: registro série a série (carga, reps, esforço), timer de descanso, desfazer
-- Progressão dupla: bateu o topo da faixa em todas as séries sem "difícil" → a carga sobe; duas sessões seguidas abaixo do mínimo → reduz ~10%
-- Resumo ao finalizar com duração, volume e a carga do próximo treino
-- O treino em andamento sobrevive a um refresh
+<p>
+  <img src="docs/screenshots/hoje.png" width="200" alt="Tela Hoje: treino do dia, água e refeições" />
+  <img src="docs/screenshots/cargas.png" width="200" alt="Progresso: recordes e evolução da carga" />
+  <img src="docs/screenshots/medalhas.png" width="200" alt="Medalhas de constância" />
+  <img src="docs/screenshots/login.png" width="200" alt="Login com opção de demonstração" />
+</p>
 
-**Painel Hoje**
-- Treino do dia (pelos dias da semana da ficha), água com meta e streak de dias cumpridos
+## Destaques
 
-**Dieta**
-- Plano alimentar do dia, com refeições e horários
-- Marcar refeição como feita
-- Trocar um alimento por um equivalente do mesmo grupo (carboidratos, proteínas…)
-- A troca vale só para o dia; o plano original não muda
-- Desfazer uma troca
-- Tudo salvo no navegador (localStorage), sem login
+- **Sugestão de carga**: progressão dupla e pirâmide; o app diz quando subir, manter ou reduzir a carga de cada exercício.
+- **Treino em andamento**: série a série, timer de descanso, cardio entre exercícios (treino híbrido), fotos dos exercícios.
+- **Dieta com lista de substituição**: troca um alimento por outro do mesmo grupo, já na porção equivalente.
+- **Agenda por data**, alongamentos guiados com timer, água com meta e sequência de dias cumpridos.
+- **Motivação pelos próprios números**: recordes, marcos, resumo da semana e medalhas de constância (sem foco em peso).
+- **Offline primeiro**: tudo funciona sem internet e sincroniza depois; conflitos nunca apagam o que ainda não foi enviado.
+- **Privacidade**: Postgres com RLS (cada pessoa só acessa os próprios dados), fotos em armazenamento privado com links temporários, exportar e apagar a conta (RGPD).
+- **Importar plano**: dieta, fichas, agenda e fotos novas por arquivo, com prévia do que muda e histórico preservado.
 
 ## Stack
 
-React 18 · TypeScript · Vite · Zustand (com `persist`) · Vitest
+React 18 · TypeScript · Vite · Zustand · Supabase (Auth, Postgres + RLS, Storage) · PWA (manifest + service worker) · Vitest + Testing Library · Vercel
 
 ## Como rodar
 

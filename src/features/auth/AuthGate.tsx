@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { startAuth, useAuth } from '../../services/auth';
 import { startSync, stopSync, useSyncStatus } from '../../services/sync';
 import { AuthPage } from './AuthPage';
+import { exitDemo } from '../../services/demo';
 
 interface Props {
   enabled: boolean; // false = sem Supabase configurado: mostra o app direto
@@ -27,6 +28,20 @@ export function AuthGate({ enabled, children }: Props) {
   if (status === 'carregando') return <Loading text="Carregando…" />;
   if (status === 'nova-senha') return <AuthPage initialMode="nova-senha" />;
   if (status === 'deslogada') return <AuthPage />;
+  if (status === 'demo')
+    return (
+      <>
+        <div className="demo-bar" role="note">
+          <span>
+            <strong>Demonstração</strong> · dados de exemplo
+          </span>
+          <button type="button" className="demo-bar__btn" onClick={exitDemo}>
+            Sair
+          </button>
+        </div>
+        {children}
+      </>
+    );
   if (firstLoad) return <Loading text="Sincronizando seus dados…" />;
   return <>{children}</>;
 }

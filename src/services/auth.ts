@@ -16,7 +16,8 @@ export type AuthStatus =
   | 'carregando' // lendo a sessão salva
   | 'deslogada'
   | 'logada'
-  | 'nova-senha'; // chegou pelo link de "esqueci minha senha"
+  | 'nova-senha' // chegou pelo link de "esqueci minha senha"
+  | 'demo'; // modo demonstração, sem conta (services/demo.ts)
 
 interface AuthState {
   status: AuthStatus;
@@ -24,6 +25,16 @@ interface AuthState {
 }
 
 export const useAuth = create<AuthState>(() => ({ status: 'carregando', user: null }));
+
+/** Marca, no aparelho, que a demonstração está aberta (sobrevive a recarregar a página). */
+export const DEMO_KEY = 'demo-mode';
+const demoOpen = () => {
+  try {
+    return localStorage.getItem(DEMO_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
 
 /** Resultado de cada ação: ok, ou a mensagem pronta para mostrar na tela. */
 export type Result = { ok: true } | { ok: false; error: string };
@@ -67,7 +78,15 @@ export function startAuth(): () => void {
     const user = toUser(session?.user);
     if (event === 'PASSWORD_RECOVERY') useAuth.setState({ status: 'nova-senha', user });
     else if (useAuth.getState().status === 'nova-senha' && session) useAuth.setState({ user }); // segue na tela de nova senha
-    else useAuth.setState({ status: session ? 'logada' : 'deslogada', user });
+    else if (session) {
+      try {
+        localStorage.removeItem(DEMO_KEY);
+      } catch {
+        /* ignora */
+      }
+      useAuth.setState({ status: 'logada', user });
+    }
+    else useAuth.setState({ status: demoOpen() || useAuth.getState().status === 'demo' ? 'demo' : 'deslogada', user: null });
   });
   return () => {
     data.subscription.unsubscribe();

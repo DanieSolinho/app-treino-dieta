@@ -6,6 +6,7 @@ import { useSettingsStore } from '../../stores/useSettingsStore';
 import { NumberStepper } from '../../components/ui/NumberStepper';
 import { ImportPlan } from './ImportPlan';
 import { downloadMyData } from '../../lib/exportData';
+import { exitDemo } from '../../services/demo';
 
 function SyncCard() {
   const state = useSyncStatus((s) => s.state);
@@ -107,6 +108,7 @@ function DangerZone() {
 
 export function SettingsPage() {
   const user = useAuth((s) => s.user);
+  const demo = useAuth((s) => s.status === 'demo');
   const goal = useSettingsStore((s) => s.waterGoalMl);
   const setGoal = useSettingsStore((s) => s.setWaterGoal);
   const [error, setError] = useState('');
@@ -142,12 +144,19 @@ export function SettingsPage() {
               </p>
             )}
           </>
+        ) : demo ? (
+          <>
+            <p className="muted">Você está na demonstração: os dados são de exemplo e nada é salvo em nenhuma conta.</p>
+            <button type="button" className="btn-sm btn-sm--outline account__signout" onClick={exitDemo}>
+              Sair da demonstração
+            </button>
+          </>
         ) : (
           <p className="muted">Modo só neste aparelho: os dados ficam salvos apenas neste navegador.</p>
         )}
       </section>
 
-      <ImportPlan />
+      {!demo && <ImportPlan />}
 
       <section className="card stack-sm" aria-labelledby="water-goal-title">
         <h2 id="water-goal-title" className="card__title">

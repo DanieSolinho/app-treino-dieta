@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { passwordProblem, sendPasswordReset, signIn, signUp, updatePassword } from '../../services/auth';
+import { enterDemo } from '../../services/demo';
 
 type Mode = 'entrar' | 'criar' | 'esqueci' | 'nova-senha';
 
@@ -191,6 +192,20 @@ export function AuthPage({ initialMode = 'entrar' }: Props) {
                 Criar conta
               </button>
             </p>
+            <div className="auth__demo">
+              <p className="muted">Só quer conhecer o app?</p>
+              <button
+                type="button"
+                className="btn-sm btn-sm--outline"
+                onClick={() => {
+                  const r = enterDemo();
+                  if (!r.ok) setError(r.error);
+                }}
+              >
+                Ver demonstração
+              </button>
+              <p className="muted auth__hint">Abre com dados de exemplo, sem criar conta.</p>
+            </div>
           </>
         )}
         {(mode === 'criar' || mode === 'esqueci') && (
