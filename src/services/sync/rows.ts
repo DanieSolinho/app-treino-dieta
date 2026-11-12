@@ -36,6 +36,7 @@ export const sessionToRow = (userId: string, s: WorkoutSession): TablesInsert<'w
   logs: asJson(s.logs),
   suggestions: asJson(s.suggestions ?? null),
   cardio: asJson(s.cardio ?? null),
+  cardio_machines: asJson(s.cardioMachines ?? null),
 });
 
 export const rowToSession = (r: Tables<'workout_sessions'>): WorkoutSession => ({
@@ -46,6 +47,7 @@ export const rowToSession = (r: Tables<'workout_sessions'>): WorkoutSession => (
   logs: (r.logs ?? {}) as unknown as WorkoutSession['logs'],
   suggestions: (r.suggestions ?? undefined) as unknown as WorkoutSession['suggestions'],
   cardio: (r.cardio ?? undefined) as unknown as WorkoutSession['cardio'],
+  cardioMachines: (r.cardio_machines ?? undefined) as unknown as WorkoutSession['cardioMachines'],
 });
 
 export const bodyToRow = (userId: string, e: BodyEntry): TablesInsert<'body_entries'> => ({

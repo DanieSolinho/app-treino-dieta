@@ -193,6 +193,7 @@ export type Database = {
       workout_sessions: {
         Row: {
           cardio: Json | null
+          cardio_machines: Json | null
           finished_at: string | null
           id: string
           logs: Json
@@ -204,6 +205,7 @@ export type Database = {
         }
         Insert: {
           cardio?: Json | null
+          cardio_machines?: Json | null
           finished_at?: string | null
           id?: string
           logs?: Json
@@ -215,6 +217,7 @@ export type Database = {
         }
         Update: {
           cardio?: Json | null
+          cardio_machines?: Json | null
           finished_at?: string | null
           id?: string
           logs?: Json

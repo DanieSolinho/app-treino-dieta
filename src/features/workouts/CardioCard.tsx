@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import type { CardioBlock } from '../../types/workout';
+import { machineLabel, type CardioBlock, type CardioMachine } from '../../types/workout';
+import { MachinePicker, lastMachine, rememberMachine } from './MachinePicker';
 import { mmss, useCountdown } from '../../hooks/useCountdown';
 
 interface Props {
   block: CardioBlock;
-  onDone: (minutes: number) => void; // 0 = pulou
+  onDone: (minutes: number, machine: CardioMachine) => void; // 0 = pulou
   onStart?: () => void;
 }
 
@@ -12,11 +13,12 @@ interface Props {
 export function CardioCard({ block, onDone, onStart }: Props) {
   const timer = useCountdown();
   const [started, setStarted] = useState(false);
+  const [machine, setMachine] = useState<CardioMachine>(lastMachine);
   const total = block.minutes * 60;
 
   // terminou o tempo: registra os minutos completos
   useEffect(() => {
-    if (started && !timer.running) onDone(block.minutes);
+    if (started && !timer.running) onDone(block.minutes, machine);
   }, [started, timer.running]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const elapsedMinutes = Math.max(1, Math.round((total - timer.remaining) / 60));
@@ -28,25 +30,26 @@ export function CardioCard({ block, onDone, onStart }: Props) {
         {block.minutes} min {block.intensity === 'intenso' ? 'intensos' : 'moderados'}
       </h2>
       <p className="cardio__text">
-        {block.activity ?? 'Corrida ou escada'} ·{' '}
+        {started ? `${machineLabel(machine)} · ` : block.activity ? `${block.activity} · ` : ''}
         {block.intensity === 'intenso' ? 'ritmo forte, difícil de conversar' : 'ritmo confortável, dá para conversar'}
       </p>
+      {!started && <MachinePicker value={machine} onChange={setMachine} dark />}
 
       {started ? (
         <>
           <p className="cardio__time" role="timer" aria-label="Tempo restante de cardio">
             {mmss(timer.remaining)}
           </p>
-          <button type="button" className="btn btn--lime" onClick={() => { timer.stop(); onDone(elapsedMinutes); }}>
+          <button type="button" className="btn btn--lime" onClick={() => { timer.stop(); onDone(elapsedMinutes, machine); }}>
             Terminar agora
           </button>
         </>
       ) : (
         <div className="cardio__actions">
-          <button type="button" className="btn btn--lime" onClick={() => { onStart?.(); timer.start(total); setStarted(true); }}>
+          <button type="button" className="btn btn--lime" onClick={() => { onStart?.(); rememberMachine(machine); timer.start(total); setStarted(true); }}>
             Começar {block.minutes} min
           </button>
-          <button type="button" className="btn btn--outline-light" onClick={() => onDone(0)}>
+          <button type="button" className="btn btn--outline-light" onClick={() => onDone(0, machine)}>
             Pular cardio
           </button>
         </div>

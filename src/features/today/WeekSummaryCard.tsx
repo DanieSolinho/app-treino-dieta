@@ -13,7 +13,7 @@ export function WeekSummaryCard({ today = new Date() }: { today?: Date }) {
   const show = day >= 1 && day <= 3;
   const r = useMemo(() => weekSummary(sessions, (d) => waterTotal(waterLog[d]), goal, today), [sessions, waterLog, goal, today]);
 
-  if (!show || (r.workouts === 0 && r.waterDays === 0)) return null;
+  if (!show || (r.workouts === 0 && r.waterDays === 0 && r.cardioMinutes === 0)) return null;
 
   const title =
     r.workouts >= 4 ? 'Semana forte!' : r.workouts >= 2 ? 'Boa semana!' : r.workouts === 1 ? 'Semana começada' : 'Nova semana, novo começo';
@@ -31,6 +31,11 @@ export function WeekSummaryCard({ today = new Date() }: { today?: Date }) {
         <span>
           <strong>{r.waterDays}</strong> de 7 dias na meta de água
         </span>
+        {r.cardioMinutes > 0 && (
+          <span>
+            <strong>{r.cardioMinutes}</strong> min de cardio
+          </span>
+        )}
         {r.loadUps > 0 && (
           <span>
             <strong>{r.loadUps}</strong> {r.loadUps === 1 ? 'exercício com carga maior' : 'exercícios com carga maior'}

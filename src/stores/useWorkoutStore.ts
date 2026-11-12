@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Effort, Schedule, SetLog, Suggestion, Workout, WorkoutSession } from '../types/workout';
+import { CARDIO_WORKOUT_ID, type CardioMachine, type Effort, type Schedule, type SetLog, type Suggestion, type Workout, type WorkoutSession } from '../types/workout';
 import type { StretchRoutine } from '../data/stretchRoutines';
 import { defaultSchedule, defaultStretches, defaultWorkouts } from '../data';
 import { suggestLoad } from '../lib/loadSuggestion';
@@ -23,7 +23,9 @@ interface WorkoutState {
   undoSet: (exerciseId: string) => void;
   cancelSession: () => void;
   /** Registra o cardio feito depois do exercício N (0 minutos = pulou). */
-  logCardio: (afterExercise: number, minutes: number) => void;
+  logCardio: (afterExercise: number, minutes: number, machine?: CardioMachine) => void;
+  /** Cardio avulso (sem ficha): vira uma sessão finalizada própria. */
+  logStandaloneCardio: (machine: CardioMachine, minutes: number, endedAt?: Date) => WorkoutSession;
   /** Calcula as sugestões, atualiza as cargas das fichas e devolve a sessão finalizada. */
   finishSession: () => WorkoutSession | null;
 }
@@ -79,8 +81,32 @@ export const useWorkoutStore = create<WorkoutState>()(
 
       cancelSession: () => set({ active: null }),
 
-      logCardio: (afterExercise, minutes) =>
-        set((s) => (s.active ? { active: { ...s.active, cardio: { ...s.active.cardio, [afterExercise]: minutes } } } : {})),
+      logCardio: (afterExercise, minutes, machine) =>
+        set((s) =>
+          s.active
+            ? {
+                active: {
+                  ...s.active,
+                  cardio: { ...s.active.cardio, [afterExercise]: minutes },
+                  ...(machine && minutes > 0 ? { cardioMachines: { ...s.active.cardioMachines, [afterExercise]: machine } } : {}),
+                },
+              }
+            : {},
+        ),
+
+      logStandaloneCardio: (machine, minutes, endedAt = new Date()) => {
+        const session: WorkoutSession = {
+          id: newId(),
+          workoutId: CARDIO_WORKOUT_ID,
+          startedAt: new Date(endedAt.getTime() - minutes * 60000).toISOString(),
+          finishedAt: endedAt.toISOString(),
+          logs: {},
+          cardio: { 0: minutes },
+          cardioMachines: { 0: machine },
+        };
+        set((s) => ({ sessions: [session, ...s.sessions] }));
+        return session;
+      },
 
       finishSession: () => {
         const { active, workouts, sessions } = get();

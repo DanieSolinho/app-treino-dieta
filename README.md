@@ -151,6 +151,13 @@ Em **Settings › Environment Variables**, cadastre `ANTHROPIC_API_KEY` e `SCAN_
 - **Baixar meus dados** (Ajustes): arquivo JSON com tudo (backup e RGPD).
 - **E-mails em português**: modelos em `supabase/email-templates/`, colados no painel em Authentication › Email Templates.
 
+## Cardio
+
+- Aparelhos: **esteira, bike, transport e simulador de escada** (`CARDIO_MACHINES` em `src/types/workout.ts`).
+- Nos blocos do treino híbrido, você escolhe o aparelho antes de começar; o resumo mostra "12 min na esteira + 5 min na bike".
+- **Cardio avulso** (Treinos › Fazer cardio): aparelho + duração, com cronômetro ou "Já fiz · só registrar". Vira uma sessão própria (`workoutId: 'cardio'`).
+- O aparelho é salvo em `workout_sessions.cardio_machines`; o resumo da semana mostra os minutos de cardio separados dos treinos.
+
 ## Lembretes (Ajustes › Lembretes)
 
 Notificações push de água e de treino, inclusive no iPhone com o app instalado na tela de início.

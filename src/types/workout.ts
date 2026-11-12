@@ -22,6 +22,21 @@ export interface Exercise {
   image?: string; // nome da foto em src/data/private/images (sem extensão)
 }
 
+/** Aparelhos de cardio. */
+export type CardioMachine = 'esteira' | 'bike' | 'transport' | 'escada';
+
+export const CARDIO_MACHINES: { id: CardioMachine; label: string }[] = [
+  { id: 'esteira', label: 'Esteira' },
+  { id: 'bike', label: 'Bike' },
+  { id: 'transport', label: 'Transport' },
+  { id: 'escada', label: 'Simulador de escada' },
+];
+
+export const machineLabel = (m?: string) => CARDIO_MACHINES.find((x) => x.id === m)?.label ?? 'Cardio';
+
+/** Ficha "virtual" das sessões só de cardio (não aparece na lista de fichas). */
+export const CARDIO_WORKOUT_ID = 'cardio';
+
 /** Cardio opcional depois de um exercício ("treino híbrido"). */
 export interface CardioBlock {
   afterExercise: number; // 1 = depois do 1º exercício
@@ -65,5 +80,6 @@ export interface WorkoutSession {
   finishedAt?: string; // ISO
   logs: Record<string, SetLog[]>; // exerciseId -> séries feitas
   suggestions?: Record<string, Suggestion>; // calculadas ao finalizar
-  cardio?: Record<number, number>; // afterExercise -> minutos feitos (0 = pulou)
+  cardio?: Record<number, number>; // afterExercise -> minutos feitos (0 = pulou); 0 = cardio avulso
+  cardioMachines?: Record<number, CardioMachine>; // afterExercise -> aparelho usado
 }

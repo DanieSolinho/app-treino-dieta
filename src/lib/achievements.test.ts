@@ -39,7 +39,7 @@ describe('semana passada', () => {
     const sessions = [s('0', '2026-10-28', { agach: [40] }), s('1', '2026-11-03', { agach: [45] }), s('2', '2026-11-06', { leg: [100] })];
     const water: Record<string, number> = { '2026-11-02': 2500, '2026-11-03': 3000, '2026-11-04': 1000 };
     const r = weekSummary(sessions, (d) => water[d] ?? 0, 2500, new Date(2026, 10, 12));
-    expect(r).toEqual({ from: '2026-11-02', to: '2026-11-08', workouts: 2, waterDays: 2, loadUps: 1 });
+    expect(r).toEqual({ from: '2026-11-02', to: '2026-11-08', workouts: 2, waterDays: 2, loadUps: 1, cardioMinutes: 0 });
   });
 });
 

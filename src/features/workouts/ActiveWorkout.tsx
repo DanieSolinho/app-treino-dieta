@@ -185,7 +185,7 @@ export function ActiveWorkout({ onFinished }: Props) {
             {warmupPhoto && <img className="photo" src={warmupPhoto} alt="Exemplo da ativação muscular" loading="lazy" />}
             {cardioTotal > 0 && (
               <p className="before__text before__text--muted">
-                Hoje tem {cardioTotal} blocos de cardio opcional (corrida ou escada) entre os exercícios. O app avisa na hora.
+                Hoje tem {cardioTotal} blocos de cardio opcional (esteira, bike, transport ou escada) entre os exercícios. O app avisa na hora.
               </p>
             )}
             {workout.hybrid && <p className="before__text before__text--muted">{workout.hybrid}</p>}
@@ -238,9 +238,9 @@ export function ActiveWorkout({ onFinished }: Props) {
             key={pendingCardio.afterExercise}
             block={pendingCardio}
             onStart={rest.stop}
-            onDone={(minutes) => {
+            onDone={(minutes, machine) => {
               rest.stop();
-              logCardio(pendingCardio.afterExercise, minutes);
+              logCardio(pendingCardio.afterExercise, minutes, machine);
             }}
           />
         )}

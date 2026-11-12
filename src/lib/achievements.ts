@@ -2,7 +2,7 @@
  * Motivação a partir dos seus próprios números: recordes, marcos, resumo da semana e medalhas.
  * De propósito, nada aqui olha o peso do corpo — só força e constância.
  */
-import type { WorkoutSession } from '../types/workout';
+import { CARDIO_WORKOUT_ID, type WorkoutSession } from '../types/workout';
 import { toDateKey } from './date';
 import { exerciseHistory } from './progress';
 
@@ -49,6 +49,7 @@ export interface WeekSummary {
   workouts: number;
   waterDays: number; // dias com a meta de água batida
   loadUps: number; // exercícios com carga maior que antes daquela semana
+  cardioMinutes: number; // blocos do treino híbrido + cardio avulso
 }
 
 export function lastWeekRange(today = new Date()): { from: Date; to: Date } {
@@ -73,7 +74,9 @@ export function weekSummary(
     return d >= fromKey && d <= toKey;
   };
   const done = finished(sessions);
-  const week = done.filter(inWeek);
+  const weekAll = done.filter(inWeek);
+  const week = weekAll.filter((s) => s.workoutId !== CARDIO_WORKOUT_ID); // treinos de musculação
+  const cardioMinutes = weekAll.reduce((sum, s) => sum + Object.values(s.cardio ?? {}).reduce((a, b) => a + b, 0), 0);
   const earlier = done.filter((s) => toDateKey(new Date(s.startedAt)) < fromKey);
 
   const exerciseIds = new Set(week.flatMap((s) => Object.keys(s.logs)));
@@ -87,7 +90,7 @@ export function weekSummary(
   let waterDays = 0;
   for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) if (waterByDate(toDateKey(d)) >= waterGoal) waterDays++;
 
-  return { from: fromKey, to: toKey, workouts: week.length, waterDays, loadUps };
+  return { from: fromKey, to: toKey, workouts: week.length, waterDays, loadUps, cardioMinutes };
 }
 
 // ---------------------------------------------------------------------------

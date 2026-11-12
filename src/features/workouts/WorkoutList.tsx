@@ -4,14 +4,18 @@ import { WEEKDAYS, formatWeekDays } from './weekdays';
 import { totalSeconds } from '../../data/stretchRoutines';
 import { lastScheduledDate, plannedFor, shortName, upcoming } from '../../lib/schedule';
 import { toDateKey } from '../../lib/date';
+import { cardioText } from '../../lib/cardio';
+import { CARDIO_WORKOUT_ID } from '../../types/workout';
+import { MachineIcon } from './MachinePicker';
 
 interface Props {
   onEdit: (id: string | null) => void; // null = nova ficha
   onStretch: (routineId: string) => void;
   onAgenda: () => void;
+  onCardio: () => void;
 }
 
-export function WorkoutList({ onEdit, onStretch, onAgenda }: Props) {
+export function WorkoutList({ onEdit, onStretch, onAgenda, onCardio }: Props) {
   const workouts = useWorkoutStore((s) => s.workouts);
   const startSession = useWorkoutStore((s) => s.startSession);
   const lastSession = useWorkoutStore((s) => s.sessions[0]);
@@ -64,7 +68,11 @@ export function WorkoutList({ onEdit, onStretch, onAgenda }: Props) {
 
       {lastSession && (
         <p className="note">
-          Último treino: {workouts.find((w) => w.id === lastSession.workoutId)?.name ?? 'ficha removida'} em{' '}
+          Último treino:{' '}
+          {lastSession.workoutId === CARDIO_WORKOUT_ID
+            ? `cardio (${cardioText(lastSession)})`
+            : (workouts.find((w) => w.id === lastSession.workoutId)?.name ?? 'ficha removida')}{' '}
+          em{' '}
           {new Date(lastSession.startedAt).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })}
         </p>
       )}
@@ -100,6 +108,22 @@ export function WorkoutList({ onEdit, onStretch, onAgenda }: Props) {
         })}
         {workouts.length === 0 && <p className="muted">Nenhuma ficha ainda. Toque no + para criar a primeira.</p>}
       </div>
+
+      <section className="stack" aria-labelledby="cardio-title">
+        <h2 id="cardio-title" className="section-title">Cardio</h2>
+        <button type="button" className="card stretch-card" onClick={onCardio}>
+          <span className="stretch-card__icon" aria-hidden="true">
+            <MachineIcon machine="esteira" />
+          </span>
+          <span className="stretch-card__text">
+            <span className="card__title">Fazer cardio</span>
+            <span className="muted">Esteira, bike, transport ou escada</span>
+          </span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </button>
+      </section>
 
       <section className="stack" aria-labelledby="stretch-title">
         <h2 id="stretch-title" className="section-title">Alongamento</h2>
