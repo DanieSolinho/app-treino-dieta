@@ -54,7 +54,7 @@ function markDirty(change: (d: Dirty) => Dirty) {
 // Dias: as 4 coleções por data viram uma linha por data
 // ---------------------------------------------------------------------------
 
-type DayMaps = Pick<ReturnType<typeof useDayStore.getState>, 'mealsDone' | 'waterLog' | 'swaps' | 'variants'>;
+type DayMaps = Pick<ReturnType<typeof useDayStore.getState>, 'mealsDone' | 'waterLog' | 'swaps' | 'variants' | 'amounts' | 'offPlan'>;
 
 export function dayRecord(s: DayMaps, date: string): DayRecord {
   return {
@@ -63,11 +63,15 @@ export function dayRecord(s: DayMaps, date: string): DayRecord {
     waterLog: s.waterLog[date] ?? [],
     swaps: s.swaps[date] ?? {},
     variants: s.variants[date] ?? {},
+    amounts: s.amounts[date] ?? {},
+    offPlan: s.offPlan[date] ?? [],
   };
 }
 
 const allDates = (s: DayMaps) => [
-  ...new Set([...Object.keys(s.mealsDone), ...Object.keys(s.waterLog), ...Object.keys(s.swaps), ...Object.keys(s.variants)]),
+  ...new Set(
+    [s.mealsDone, s.waterLog, s.swaps, s.variants, s.amounts, s.offPlan].flatMap((m) => Object.keys(m)),
+  ),
 ];
 
 /** Datas em que alguma das 4 coleções mudou (as stores são imutáveis: basta comparar referências). */
@@ -77,7 +81,9 @@ export function changedDates(next: DayMaps, prev: DayMaps): string[] {
       next.mealsDone[d] !== prev.mealsDone[d] ||
       next.waterLog[d] !== prev.waterLog[d] ||
       next.swaps[d] !== prev.swaps[d] ||
-      next.variants[d] !== prev.variants[d],
+      next.variants[d] !== prev.variants[d] ||
+      next.amounts[d] !== prev.amounts[d] ||
+      next.offPlan[d] !== prev.offPlan[d],
   );
 }
 
@@ -212,12 +218,14 @@ export function applyRemote(remote: RemoteSnapshot) {
 
     // dias
     const day = useDayStore.getState();
-    const maps: DayMaps = { mealsDone: {}, waterLog: {}, swaps: {}, variants: {} };
+    const maps: DayMaps = { mealsDone: {}, waterLog: {}, swaps: {}, variants: {}, amounts: {}, offPlan: {} };
     const put = (r: DayRecord) => {
       if (r.mealsDone.length) maps.mealsDone[r.date] = r.mealsDone;
       if (r.waterLog.length) maps.waterLog[r.date] = r.waterLog;
       if (Object.keys(r.swaps).length) maps.swaps[r.date] = r.swaps;
       if (Object.keys(r.variants).length) maps.variants[r.date] = r.variants;
+      if (Object.keys(r.amounts ?? {}).length) maps.amounts[r.date] = r.amounts;
+      if (r.offPlan?.length) maps.offPlan[r.date] = r.offPlan;
     };
     remote.days.filter((r) => !d.days.includes(r.date)).forEach(put);
     d.days.forEach((date) => put(dayRecord(day, date)));

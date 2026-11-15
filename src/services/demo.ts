@@ -24,7 +24,7 @@ export function enterDemo(): Result {
   const d = buildDemoData();
   useDietStore.setState({ plan: d.diet });
   useWorkoutStore.setState({ workouts: d.workouts, schedule: d.schedule, stretches: d.stretches, sessions: d.sessions, active: null });
-  useDayStore.setState({ waterLog: d.waterLog, mealsDone: d.mealsDone, swaps: {}, variants: {} });
+  useDayStore.setState({ waterLog: d.waterLog, mealsDone: d.mealsDone, swaps: {}, variants: {}, amounts: {}, offPlan: {} });
   useBodyStore.setState({ entries: d.body });
   useSettingsStore.setState({ waterGoalMl: d.waterGoalMl });
   try {

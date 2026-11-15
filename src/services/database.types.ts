@@ -48,8 +48,10 @@ export type Database = {
       }
       day_logs: {
         Row: {
+          amounts: Json
           date: string
           meals_done: string[]
+          off_plan: Json
           swaps: Json
           updated_at: string
           user_id: string
@@ -57,8 +59,10 @@ export type Database = {
           water_log: number[]
         }
         Insert: {
+          amounts?: Json
           date: string
           meals_done?: string[]
+          off_plan?: Json
           swaps?: Json
           updated_at?: string
           user_id?: string
@@ -66,8 +70,10 @@ export type Database = {
           water_log?: number[]
         }
         Update: {
+          amounts?: Json
           date?: string
           meals_done?: string[]
+          off_plan?: Json
           swaps?: Json
           updated_at?: string
           user_id?: string

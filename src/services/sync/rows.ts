@@ -17,6 +17,8 @@ export const dayToRow = (userId: string, d: DayRecord): TablesInsert<'day_logs'>
   water_log: d.waterLog,
   swaps: asJson(d.swaps),
   variants: asJson(d.variants),
+  amounts: asJson(d.amounts),
+  off_plan: asJson(d.offPlan),
 });
 
 export const rowToDay = (r: Tables<'day_logs'>): DayRecord => ({
@@ -25,6 +27,8 @@ export const rowToDay = (r: Tables<'day_logs'>): DayRecord => ({
   waterLog: r.water_log ?? [],
   swaps: (r.swaps ?? {}) as unknown as DayRecord['swaps'],
   variants: (r.variants ?? {}) as unknown as DayRecord['variants'],
+  amounts: (r.amounts ?? {}) as unknown as DayRecord['amounts'],
+  offPlan: (r.off_plan ?? []) as unknown as DayRecord['offPlan'],
 });
 
 export const sessionToRow = (userId: string, s: WorkoutSession): TablesInsert<'workout_sessions'> => ({

@@ -20,7 +20,7 @@ export function collectMyData(account?: { email?: string; displayName?: string }
     schedule: w.schedule,
     stretches: w.stretches,
     sessions: w.sessions.filter((s) => s.finishedAt),
-    days: { mealsDone: d.mealsDone, waterLog: d.waterLog, swaps: d.swaps, variants: d.variants },
+    days: { mealsDone: d.mealsDone, waterLog: d.waterLog, swaps: d.swaps, variants: d.variants, amounts: d.amounts, offPlan: d.offPlan },
     body: useBodyStore.getState().entries,
   };
 }

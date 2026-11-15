@@ -1,4 +1,4 @@
-import type { DietPlan, Food } from '../../types/diet';
+import type { DietPlan, Food, OffPlanEntry } from '../../types/diet';
 import type { Schedule, Workout, WorkoutSession } from '../../types/workout';
 import type { StretchRoutine } from '../../data/stretchRoutines';
 import type { BodyEntry } from '../../types/body';
@@ -10,6 +10,8 @@ export interface DayRecord {
   waterLog: number[];
   swaps: Record<string, Food>;
   variants: Record<string, string>;
+  amounts: Record<string, number>; // itemId -> gramas comidas
+  offPlan: OffPlanEntry[]; // refeições fora da dieta
 }
 
 /** Fichas, agenda e alongamentos: ficam juntos numa linha (workout_plans). */

@@ -44,3 +44,26 @@ describe('trocas da dieta', () => {
     expect(useDayStore.getState().mealsDone[today]).toEqual([]);
   });
 });
+
+describe('quantidades e fora da dieta', () => {
+  beforeEach(() => useDayStore.setState({ swaps: {}, amounts: {}, offPlan: {} }));
+
+  it('guarda a quantidade, apaga com vazio e zera ao trocar o alimento', () => {
+    const { setAmount, swap } = useDayStore.getState();
+    setAmount(today, 'alm-arroz', 80);
+    expect(useDayStore.getState().amounts[today]).toEqual({ 'alm-arroz': 80 });
+    setAmount(today, 'alm-arroz', null);
+    expect(useDayStore.getState().amounts[today]).toEqual({});
+    setAmount(today, 'alm-arroz', 80);
+    swap(today, 'alm-arroz', batata);
+    expect(useDayStore.getState().amounts[today]).toEqual({});
+  });
+
+  it('adiciona e apaga refeições fora da dieta', () => {
+    useDayStore.getState().addOffPlan(today, { text: 'Pizza', kcal: 600 });
+    const [entry] = useDayStore.getState().offPlan[today];
+    expect(entry).toMatchObject({ text: 'Pizza', kcal: 600 });
+    useDayStore.getState().removeOffPlan(today, entry.id);
+    expect(useDayStore.getState().offPlan[today]).toEqual([]);
+  });
+});

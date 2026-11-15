@@ -83,7 +83,7 @@ describe('sincronização', () => {
     expect(u.diet?.title).toBe(samplePlan.title);
     expect(u.workouts?.workouts).toHaveLength(sampleWorkouts.length);
     expect(u.sessions.map((s) => s.id)).toEqual(['s1']);
-    expect(u.days).toEqual([{ date: '2026-11-12', mealsDone: [], waterLog: [500], swaps: {}, variants: {} }]);
+    expect(u.days).toEqual([{ date: '2026-11-12', mealsDone: [], waterLog: [500], swaps: {}, variants: {}, amounts: {}, offPlan: [] }]);
     expect(u.body[0]).toMatchObject({ date: '2026-11-10', weightKg: 68.4 });
     expect(u.waterGoalMl).toBe(3000);
     expect(useSyncMeta.getState().owner).toBe('dani');
@@ -93,7 +93,7 @@ describe('sincronização', () => {
   it('aparelho novo: os dados da conta substituem os de exemplo, sem reenviar nada', async () => {
     const u = server.user('dani');
     u.diet = { ...samplePlan, title: 'Plano da nutricionista' };
-    u.days = [{ date: '2026-11-12', mealsDone: ['cafe'], waterLog: [250, 250], swaps: {}, variants: {} }];
+    u.days = [{ date: '2026-11-12', mealsDone: ['cafe'], waterLog: [250, 250], swaps: {}, variants: {}, amounts: {}, offPlan: [] }];
     u.sessions = [session('s9', '2026-11-11')];
     u.waterGoalMl = 2000;
 
@@ -174,8 +174,8 @@ describe('sincronização', () => {
 
     // enquanto isso, outro aparelho mexeu no mesmo dia e em outro dia
     server.user('dani').days = [
-      { date: '2026-11-12', mealsDone: [], waterLog: [999], swaps: {}, variants: {} },
-      { date: '2026-11-11', mealsDone: ['cafe'], waterLog: [], swaps: {}, variants: {} },
+      { date: '2026-11-12', mealsDone: [], waterLog: [999], swaps: {}, variants: {}, amounts: {}, offPlan: [] },
+      { date: '2026-11-11', mealsDone: ['cafe'], waterLog: [], swaps: {}, variants: {}, amounts: {}, offPlan: [] },
     ];
     server.setOnline(true);
     await engine.syncNow({ pull: true });

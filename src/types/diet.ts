@@ -4,6 +4,14 @@ export interface Food {
   measure: string; // medida caseira: "colher(es) de sopa cheia(s)", "fatia(s) média(s)"…
   grams?: number;
   unit?: 'g' | 'ml'; // padrão: g
+  kcal?: number; // kcal por 100 g/ml; sem isso, o app procura na tabela (src/data/kcalTable.ts)
+}
+
+/** Algo comido fora do plano, registrado à mão. */
+export interface OffPlanEntry {
+  id: string;
+  text: string; // "2 fatias de pizza de calabresa"
+  kcal: number;
 }
 
 export interface SubstitutionGroup {
@@ -42,6 +50,7 @@ export interface Meal {
 
 export interface DietPlan {
   title?: string;
+  kcalGoal?: number; // meta do dia; sem isso, o app lê do título ("… · 1300 kcal")
   meals: Meal[];
   groups: SubstitutionGroup[];
 }

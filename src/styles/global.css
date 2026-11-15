@@ -595,3 +595,33 @@ fieldset.field > legend { margin-bottom: 8px; }
 .cardio-run { align-items: center; gap: 16px; }
 .cardio-run__machine { display: flex; align-items: center; gap: 6px; }
 .cardio-run .btn { width: 100%; }
+
+/* Dieta: quanto comi, fora da dieta e calorias do dia */
+.amount { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.amount__input {
+  width: 64px; height: 36px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink); font: inherit; font-size: 16px; text-align: right;
+}
+.amount__input::placeholder { color: #8a948f; }
+.amount__input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+.amount__unit { font-size: 12px; color: var(--muted); }
+.amount__kcal { margin-left: auto; font-size: 12px; color: var(--muted); }
+.amount__kcal--typed { color: var(--brand); font-weight: 600; }
+
+.row { display: flex; gap: 8px; }
+.offplan { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.offplan__item { display: flex; align-items: baseline; gap: 8px; font-size: 14px; }
+.offplan__text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.offplan__kcal { font-weight: 600; white-space: nowrap; }
+.offplan__textarea { height: auto; padding: 10px 12px; resize: vertical; }
+
+.kcal__total { margin: 0; font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--bg); }
+.kcal__goal { font-size: 15px; font-weight: 500; color: #b9c2bd; }
+.kcal__bar { height: 8px; border-radius: 999px; background: #2e3537; overflow: hidden; }
+.kcal__fill { display: block; height: 100%; border-radius: inherit; background: var(--lime); }
+.kcal__fill--over { background: #ff8a65; }
+.kcal__parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 4px 0 0; }
+.kcal__parts dt { font-size: 11px; color: #b9c2bd; }
+.kcal__parts dd { margin: 0; font-size: 14px; font-weight: 600; }
+.kcal__note { margin: 0; font-size: 12px; color: #b9c2bd; line-height: 1.4; }
+.offplan__add { flex: none; }

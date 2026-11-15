@@ -10,7 +10,7 @@ import { sampleWorkouts } from './data/sampleWorkouts';
 
 // Os testes usam sempre os dados de exemplo, mesmo com src/data/private/ presente
 beforeEach(() => {
-  useDayStore.setState({ swaps: {}, mealsDone: {}, waterLog: {}, variants: {} });
+  useDayStore.setState({ swaps: {}, mealsDone: {}, waterLog: {}, variants: {}, amounts: {}, offPlan: {} });
   useDietStore.setState({ plan: samplePlan });
   useWorkoutStore.setState({ workouts: sampleWorkouts, sessions: [], active: null });
 });

@@ -5,6 +5,7 @@ import { useDayStore } from '../../stores/useDayStore';
 import { formatLongDate, toDateKey } from '../../lib/date';
 import { MealCard } from './MealCard';
 import { SubstitutionSheet } from './SubstitutionSheet';
+import { DayCalories } from './DayCalories';
 
 // Referência fixa: um `[]` novo a cada render faz o Zustand 5 entrar em loop
 const NO_MEALS: string[] = [];
@@ -49,6 +50,7 @@ export function DietPage() {
             onSwap={(item) => setSwapping({ item, mealName: meal.name })}
           />
         ))}
+        <DayCalories />
       </div>
 
       <SubstitutionSheet
