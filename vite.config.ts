@@ -29,8 +29,23 @@ function apiInDev(env: Record<string, string>): Plugin {
   };
 }
 
+/** Identificador da versão publicada: o commit na Vercel, ou a hora do build no computador. */
+const APP_VERSION = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? `local-${Date.now()}`;
+
+/** Gera dist/version.json: o app compara com a própria versão para saber se há uma nova publicada. */
+function versionFile(): Plugin {
+  return {
+    name: 'version-file',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ version: APP_VERSION }) });
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), apiInDev(loadEnv(mode, process.cwd(), ''))],
+  plugins: [react(), apiInDev(loadEnv(mode, process.cwd(), '')), versionFile()],
+  define: { __APP_VERSION__: JSON.stringify(APP_VERSION) },
   // Para publicar no GitHub Pages, troque por '/nome-do-repositorio/'
   base: './',
   test: {

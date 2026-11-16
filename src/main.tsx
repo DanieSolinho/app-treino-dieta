@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
+import { watchForUpdates } from './lib/appUpdate';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -15,3 +16,6 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }
+
+// Ao voltar para o app: carrega a versão nova, se houver, e vira o dia (o app pode ficar aberto de um dia para o outro)
+if (import.meta.env.PROD) watchForUpdates();
