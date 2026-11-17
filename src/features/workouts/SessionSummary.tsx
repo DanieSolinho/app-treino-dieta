@@ -4,6 +4,7 @@ import { formatKg } from '../../lib/loadSuggestion';
 import { mmss } from '../../hooks/useCountdown';
 import { sessionMilestone, sessionRecords } from '../../lib/achievements';
 import { cardioText } from '../../lib/cardio';
+import { SessionKcal } from './SessionKcal';
 
 interface Props {
   sessionId: string;
@@ -73,6 +74,10 @@ export function SessionSummary({ sessionId, onClose }: Props) {
       </div>
 
       {cardioMinutes > 0 && <p className="note">Cardio: {cardioText(session)}.</p>}
+
+      <section className="card">
+        <SessionKcal sessionId={session.id} />
+      </section>
 
       <section className="card card--dark" aria-labelledby="next-title">
         <h2 id="next-title" className="card__title">

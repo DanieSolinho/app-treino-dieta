@@ -28,6 +28,8 @@ interface WorkoutState {
   logStandaloneCardio: (machine: CardioMachine, minutes: number, endedAt?: Date) => WorkoutSession;
   /** Calcula as sugestões, atualiza as cargas das fichas e devolve a sessão finalizada. */
   finishSession: () => WorkoutSession | null;
+  /** Calorias gastas no treino (do relógio); null apaga. */
+  setSessionKcal: (sessionId: string, kcal: number | null) => void;
 }
 
 /** Séries do exercício na última sessão finalizada em que ele apareceu. */
@@ -107,6 +109,15 @@ export const useWorkoutStore = create<WorkoutState>()(
         set((s) => ({ sessions: [session, ...s.sessions] }));
         return session;
       },
+
+      setSessionKcal: (sessionId, kcal) =>
+        set((s) => ({
+          sessions: s.sessions.map((x) => {
+            if (x.id !== sessionId) return x;
+            const { kcal: _old, ...rest } = x;
+            return kcal === null ? rest : { ...rest, kcal: Math.round(kcal) };
+          }),
+        })),
 
       finishSession: () => {
         const { active, workouts, sessions } = get();

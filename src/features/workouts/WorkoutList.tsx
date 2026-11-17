@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useWorkoutStore } from '../../stores/useWorkoutStore';
+import { SessionKcal } from './SessionKcal';
 import { WEEKDAYS, formatWeekDays } from './weekdays';
 import { totalSeconds } from '../../data/stretchRoutines';
 import { lastScheduledDate, plannedFor, shortName, upcoming } from '../../lib/schedule';
@@ -75,6 +76,11 @@ export function WorkoutList({ onEdit, onStretch, onAgenda, onCardio }: Props) {
           em{' '}
           {new Date(lastSession.startedAt).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })}
         </p>
+      )}
+      {lastSession && (
+        <div className="card">
+          <SessionKcal key={lastSession.id} sessionId={lastSession.id} />
+        </div>
       )}
 
       <div className="stack">

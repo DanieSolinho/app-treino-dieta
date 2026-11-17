@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import type { Food, OffPlanEntry } from '../../types/diet';
 import { useDietStore } from '../../stores/useDietStore';
 import { useDayStore } from '../../stores/useDayStore';
+import { useWorkoutStore } from '../../stores/useWorkoutStore';
 import { dayCalories, formatKcal, kcalFor, kcalGoal, normalizeName } from '../../lib/calories';
 import { formatAmount } from '../../lib/food';
 import { toDateKey } from '../../lib/date';
@@ -261,6 +262,9 @@ function TotalCard() {
     () => dayCalories({ meals: plan.meals, mealsDone, variants, swaps, amounts, offPlan }),
     [plan.meals, mealsDone, variants, swaps, amounts, offPlan],
   );
+  const burned = useWorkoutStore((s) =>
+    s.sessions.reduce((sum, x) => (x.kcal !== undefined && toDateKey(new Date(x.startedAt)) === date ? sum + x.kcal : sum), 0),
+  );
   const goal = kcalGoal(plan);
   const left = goal !== undefined ? goal - c.total : undefined;
 
@@ -294,6 +298,11 @@ function TotalCard() {
           </div>
         )}
       </dl>
+      {burned > 0 && (
+        <p className="kcal__burned">
+          Treino: <strong>{formatKcal(burned)} gastas</strong> <span>· não muda a meta</span>
+        </p>
+      )}
       <p className="kcal__note">
         Conta as refeições marcadas como feitas e os itens em que você digitou a quantidade. Valores aproximados.
         {c.unknown.length > 0 && ` Sem calorias cadastradas: ${[...new Set(c.unknown)].join(', ').toLowerCase()}.`}

@@ -82,4 +82,5 @@ export interface WorkoutSession {
   suggestions?: Record<string, Suggestion>; // calculadas ao finalizar
   cardio?: Record<number, number>; // afterExercise -> minutos feitos (0 = pulou); 0 = cardio avulso
   cardioMachines?: Record<number, CardioMachine>; // afterExercise -> aparelho usado
+  kcal?: number; // calorias gastas, digitadas do relógio
 }

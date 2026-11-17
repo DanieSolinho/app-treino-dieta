@@ -632,3 +632,12 @@ fieldset.field > legend { margin-bottom: 8px; }
 .offplan__picked { background: var(--bg); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
 .offplan__picked-name { margin: 0; font-weight: 600; }
 .offplan__picked .muted { margin: 0; font-size: 13px; }
+
+/* Calorias gastas no treino */
+.session-kcal { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 0; }
+.session-kcal__field { display: flex; flex-direction: column; gap: 6px; }
+.session-kcal__label { font-size: 13px; color: var(--muted); }
+.session-kcal__input { width: 96px; }
+.session-kcal .btn-sm { flex: none; padding: 0 18px; }
+.kcal__burned { margin: 0; font-size: 13px; color: var(--bg); }
+.kcal__burned span { color: #b9c2bd; }

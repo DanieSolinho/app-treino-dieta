@@ -202,6 +202,7 @@ export type Database = {
           cardio_machines: Json | null
           finished_at: string | null
           id: string
+          kcal: number | null
           logs: Json
           started_at: string
           suggestions: Json | null
@@ -214,6 +215,7 @@ export type Database = {
           cardio_machines?: Json | null
           finished_at?: string | null
           id?: string
+          kcal?: number | null
           logs?: Json
           started_at: string
           suggestions?: Json | null
@@ -226,6 +228,7 @@ export type Database = {
           cardio_machines?: Json | null
           finished_at?: string | null
           id?: string
+          kcal?: number | null
           logs?: Json
           started_at?: string
           suggestions?: Json | null
