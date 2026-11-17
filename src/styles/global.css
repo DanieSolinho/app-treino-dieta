@@ -625,3 +625,10 @@ fieldset.field > legend { margin-bottom: 8px; }
 .kcal__parts dd { margin: 0; font-size: 14px; font-weight: 600; }
 .kcal__note { margin: 0; font-size: 12px; color: #b9c2bd; line-height: 1.4; }
 .offplan__add { flex: none; }
+.offplan__modes { margin: 0; }
+.offplan__list { max-height: 50vh; overflow-y: auto; padding-right: 2px; }
+.offplan__list .option { background: var(--bg); min-height: 60px; padding: 8px 14px; }
+.offplan__opt { display: flex; flex-direction: column; gap: 8px; }
+.offplan__picked { background: var(--bg); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.offplan__picked-name { margin: 0; font-weight: 600; }
+.offplan__picked .muted { margin: 0; font-size: 13px; }

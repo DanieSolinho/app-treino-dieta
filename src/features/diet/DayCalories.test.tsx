@@ -25,6 +25,7 @@ describe('Calorias do dia', () => {
     expect(total()).toContain('251 kcal');
 
     fireEvent.click(screen.getByRole('button', { name: '+ Registrar refeição fora da dieta' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Outro alimento' }));
     fireEvent.change(screen.getByLabelText('O que comi'), { target: { value: 'Pastel de queijo' } });
     fireEvent.change(screen.getByLabelText('Calorias (kcal)'), { target: { value: '300' } });
     fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
@@ -40,7 +41,27 @@ describe('Calorias do dia', () => {
   it('não deixa adicionar sem descrição ou calorias', () => {
     render(<DietPage />);
     fireEvent.click(screen.getByRole('button', { name: '+ Registrar refeição fora da dieta' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Outro alimento' }));
     fireEvent.change(screen.getByLabelText('O que comi'), { target: { value: 'Brigadeiro' } });
     expect((screen.getByRole('button', { name: 'Adicionar' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('registra um alimento da lista da dieta com a porção sugerida ou outra quantidade', () => {
+    render(<DietPage />);
+    fireEvent.click(screen.getByRole('button', { name: '+ Registrar refeição fora da dieta' }));
+    // a lista da dieta abre primeiro, com porção e calorias de cada alimento
+    expect(screen.getByText(/1 unidade\(s\) média\(s\) \(65 g\) · 64 kcal/)).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText('Buscar na lista da dieta'), { target: { value: 'banana' } });
+    expect(screen.queryByRole('radio', { name: /Maçã/ })).toBeNull();
+    fireEvent.click(screen.getByRole('radio', { name: /Banana prata/ }));
+
+    const qty = screen.getByLabelText('Quantidade de banana prata fora da dieta, em g') as HTMLInputElement;
+    expect(qty.value).toBe('65');
+    fireEvent.change(qty, { target: { value: '130' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
+
+    expect(screen.getByText('Banana prata · 130 g')).toBeTruthy();
+    expect(total()).toContain('127 kcal');
   });
 });

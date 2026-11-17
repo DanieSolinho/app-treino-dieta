@@ -2,7 +2,8 @@ import { useMemo, useState, type FormEvent } from 'react';
 import type { Food, OffPlanEntry } from '../../types/diet';
 import { useDietStore } from '../../stores/useDietStore';
 import { useDayStore } from '../../stores/useDayStore';
-import { dayCalories, formatKcal, kcalGoal } from '../../lib/calories';
+import { dayCalories, formatKcal, kcalFor, kcalGoal, normalizeName } from '../../lib/calories';
+import { formatAmount } from '../../lib/food';
 import { toDateKey } from '../../lib/date';
 
 // Referências fixas: objetos novos a cada render fazem o Zustand 5 entrar em loop
@@ -10,13 +11,129 @@ const NONE: string[] = [];
 const NO_MAP: Record<string, never> = {};
 const NO_ENTRIES: OffPlanEntry[] = [];
 
-/** "Fora da dieta": o que comi + calorias (pesquisadas por você). */
+interface DietOption {
+  key: string;
+  group: string;
+  food: Food;
+  kcal: number;
+}
+
+/** Alimentos da lista de substituição que têm gramas e calorias, por grupo. */
+function useDietOptions(): DietOption[] {
+  const groups = useDietStore((s) => s.plan.groups);
+  return useMemo(
+    () =>
+      groups.flatMap((g) =>
+        g.options.flatMap((food) => {
+          const kcal = kcalFor(food, food.grams);
+          return kcal === undefined ? [] : [{ key: `${g.id}-${food.name}`, group: g.name, food, kcal }];
+        }),
+      ),
+    [groups],
+  );
+}
+
+const unitOf = (food: Food) => food.unit ?? 'g';
+const parseNumber = (text: string) => Number(text.replace(',', '.'));
+
+/** Escolher um alimento da dieta: mostra a porção sugerida e calcula as calorias da quantidade. */
+function FromDietForm({ onAdd, onCancel }: { onAdd: (entry: Omit<OffPlanEntry, 'id'>) => void; onCancel: () => void }) {
+  const options = useDietOptions();
+  const [query, setQuery] = useState('');
+  const [picked, setPicked] = useState<DietOption | null>(null);
+  const [grams, setGrams] = useState('');
+
+  const q = normalizeName(query);
+  const visible = q ? options.filter((o) => normalizeName(o.food.name).includes(q)) : options;
+  const amount = parseNumber(grams);
+  const valid = picked !== null && grams.trim() !== '' && Number.isFinite(amount) && amount > 0;
+  const kcal = valid ? kcalFor(picked.food, amount) : undefined;
+
+  function pick(o: DietOption) {
+    setPicked(o);
+    setGrams(String(o.food.grams).replace('.', ','));
+  }
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!valid || kcal === undefined) return;
+    const qty = `${amount.toLocaleString('pt-BR')} ${unitOf(picked.food)}`;
+    onAdd({ text: `${picked.food.name} · ${qty}`, kcal });
+  }
+
+  let lastGroup = '';
+  return (
+    <form className="stack-sm" onSubmit={submit}>
+      <label className="field">
+        <span className="field__label">Buscar na lista da dieta</span>
+        <input className="input" type="search" placeholder="Ex.: banana, picanha, whey" value={query} onChange={(e) => setQuery(e.target.value)} />
+      </label>
+
+      <fieldset className="options offplan__list">
+        <legend className="sr-only">Alimentos da dieta</legend>
+        {visible.length === 0 && <p className="muted">Nada encontrado. Use "Outro alimento".</p>}
+        {visible.map((o) => {
+          const header = o.group !== lastGroup ? <p className="options__divider">{o.group}</p> : null;
+          lastGroup = o.group;
+          const checked = picked?.key === o.key;
+          return (
+            <div key={o.key} className="offplan__opt">
+              {header}
+              <label className={`option ${checked ? 'option--checked' : ''}`}>
+                <input type="radio" name="da-dieta" checked={checked} onChange={() => pick(o)} />
+                <span className="option__text">
+                  <span className="option__name">{o.food.name}</span>
+                  <span className="option__amount">
+                    {formatAmount(o.food)} · {formatKcal(o.kcal)}
+                  </span>
+                </span>
+              </label>
+            </div>
+          );
+        })}
+      </fieldset>
+
+      {picked && (
+        <div className="offplan__picked">
+          <p className="offplan__picked-name">{picked.food.name}</p>
+          <p className="muted">
+            Sugestão: {formatAmount(picked.food)} · {formatKcal(picked.kcal)}
+          </p>
+          <div className="amount">
+            <input
+              className="amount__input"
+              type="text"
+              inputMode="decimal"
+              value={grams}
+              aria-label={`Quantidade de ${picked.food.name.toLowerCase()} fora da dieta, em ${unitOf(picked.food)}`}
+              onChange={(e) => setGrams(e.target.value)}
+            />
+            <span className="amount__unit">{unitOf(picked.food)}</span>
+            {kcal !== undefined && <span className="amount__kcal amount__kcal--typed">{formatKcal(kcal)}</span>}
+          </div>
+        </div>
+      )}
+
+      <div className="row">
+        <button type="button" className="btn-sm btn-sm--outline" onClick={onCancel}>
+          Cancelar
+        </button>
+        <button type="submit" className="btn-sm btn-sm--dark" disabled={!valid}>
+          Adicionar
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/** "Fora da dieta": um alimento da lista da dieta, ou outro com as calorias pesquisadas por você. */
 function OffPlanCard() {
   const date = toDateKey();
   const entries = useDayStore((s) => s.offPlan[date] ?? NO_ENTRIES);
   const add = useDayStore((s) => s.addOffPlan);
   const remove = useDayStore((s) => s.removeOffPlan);
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<'dieta' | 'outro'>('dieta');
   const [text, setText] = useState('');
   const [kcal, setKcal] = useState('');
   const kcalNumber = Number(kcal.replace(',', '.'));
@@ -51,7 +168,37 @@ function OffPlanCard() {
         </ul>
       )}
 
-      {open ? (
+      {open && (
+        <div className="variant offplan__modes" role="radiogroup" aria-label="De onde vem o alimento">
+          {(
+            [
+              ['dieta', 'Da lista da dieta'],
+              ['outro', 'Outro alimento'],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="radio"
+              aria-checked={mode === id}
+              className={`variant__opt ${mode === id ? 'variant__opt--on' : ''}`}
+              onClick={() => setMode(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {open && mode === 'dieta' ? (
+        <FromDietForm
+          onCancel={() => setOpen(false)}
+          onAdd={(entry) => {
+            add(date, entry);
+            setOpen(false);
+          }}
+        />
+      ) : open ? (
         <form className="stack-sm" onSubmit={submit}>
           <label className="field">
             <span className="field__label">O que comi</span>
@@ -85,7 +232,14 @@ function OffPlanCard() {
           </div>
         </form>
       ) : (
-        <button type="button" className="btn-sm btn-sm--outline offplan__add" onClick={() => setOpen(true)}>
+        <button
+          type="button"
+          className="btn-sm btn-sm--outline offplan__add"
+          onClick={() => {
+            setMode('dieta');
+            setOpen(true);
+          }}
+        >
           + Registrar refeição fora da dieta
         </button>
       )}
