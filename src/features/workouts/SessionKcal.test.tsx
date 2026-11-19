@@ -15,7 +15,7 @@ const now = new Date();
 const session: WorkoutSession = {
   id: 's1',
   workoutId: sampleWorkouts[0].id,
-  startedAt: new Date(now.getTime() - 3600_000).toISOString(),
+  startedAt: now.toISOString(), // começa "agora": o teste não depende da hora em que roda
   finishedAt: now.toISOString(),
   logs: {},
 };

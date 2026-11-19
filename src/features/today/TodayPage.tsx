@@ -72,7 +72,7 @@ export function TodayPage({ goTo }: Props) {
       </section>
 
       <p className="muted streak-hint">
-        Um dia conta no streak quando você marca todas as refeições e bate a meta de água.
+        Um dia conta no streak quando você treina, ou bate a meta de água e marca pelo menos 3 refeições ou fica dentro da meta de calorias.
       </p>
     </main>
   );
