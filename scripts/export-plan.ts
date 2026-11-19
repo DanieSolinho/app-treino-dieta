@@ -6,7 +6,7 @@
  *   opções: --only diet,workouts,schedule,stretches   (padrão: tudo)
  *           --images A1,inf-03 | all | none            (padrão: none)
  */
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { defaultPlan, defaultSchedule, defaultStretches, defaultWorkouts, usingPrivateData } from '../src/data';
 import { PLAN_FORMAT, PLAN_VERSION, parsePlanFile, type PlanFile } from '../src/lib/planImport';
@@ -25,7 +25,8 @@ if (!usingPrivateData) throw new Error('src/data/private não encontrado: nada p
 const only = new Set((opt('only') ?? 'diet,workouts,schedule,stretches').split(','));
 const imagesDir = join(process.cwd(), 'src/data/private/images');
 const imageOpt = opt('images') ?? 'none';
-const allImages = readdirSync(imagesDir).filter((f) => f.endsWith('.webp')).map((f) => f.replace(/\.webp$/, ''));
+// sem a pasta de fotos (ex.: perdida), exporta só os dados — as fotos já estão no servidor
+const allImages = existsSync(imagesDir) ? readdirSync(imagesDir).filter((f) => f.endsWith('.webp')).map((f) => f.replace(/\.webp$/, '')) : [];
 const imageNames = imageOpt === 'all' ? allImages : imageOpt === 'none' ? [] : imageOpt.split(',');
 
 const plan: PlanFile = {

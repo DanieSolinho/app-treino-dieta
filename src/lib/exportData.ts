@@ -5,6 +5,7 @@ import { useDayStore } from '../stores/useDayStore';
 import { useBodyStore } from '../stores/useBodyStore';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { toDateKey } from './date';
+import { PLAN_FORMAT, PLAN_VERSION, type PlanFile } from './planImport';
 
 export function collectMyData(account?: { email?: string; displayName?: string }) {
   const w = useWorkoutStore.getState();
@@ -27,13 +28,40 @@ export function collectMyData(account?: { email?: string; displayName?: string }
 
 export const backupFileName = (today = new Date()) => `treino-dieta-meus-dados-${toDateKey(today)}.json`;
 
+/**
+ * O plano atual (dieta, fichas, agenda e alongamentos) no formato do "Importar plano".
+ * É a cópia de segurança que dá para reimportar neste ou em outro aparelho.
+ */
+export function collectPlanFile(today = new Date()): PlanFile {
+  const w = useWorkoutStore.getState();
+  return {
+    format: PLAN_FORMAT,
+    version: PLAN_VERSION,
+    label: `Backup de ${today.toLocaleDateString('pt-BR')}`,
+    diet: useDietStore.getState().plan,
+    workouts: w.workouts,
+    schedule: w.schedule,
+    stretches: w.stretches,
+  };
+}
+
+export const planFileName = (today = new Date()) => `treino-dieta-plano-${toDateKey(today)}.json`;
+
+export function downloadPlanFile() {
+  downloadJson(collectPlanFile(), planFileName());
+}
+
 /** Gera o download no navegador (no iPhone abre a folha de compartilhar/salvar). */
 export function downloadMyData(account?: { email?: string; displayName?: string }) {
-  const blob = new Blob([JSON.stringify(collectMyData(account), null, 2)], { type: 'application/json' });
+  downloadJson(collectMyData(account), backupFileName());
+}
+
+function downloadJson(data: unknown, fileName: string) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = backupFileName();
+  a.download = fileName;
   document.body.appendChild(a);
   a.click();
   a.remove();

@@ -641,3 +641,27 @@ fieldset.field > legend { margin-bottom: 8px; }
 .session-kcal .btn-sm { flex: none; padding: 0 18px; }
 .kcal__burned { margin: 0; font-size: 13px; color: var(--bg); }
 .kcal__burned span { color: #b9c2bd; }
+.kcal__protein { margin: 0; font-size: 13px; color: var(--bg); }
+.kcal__protein span { color: #b9c2bd; }
+
+/* Progresso › Calorias */
+.bar { fill: var(--brand); }
+.bar--over { fill: #e8835f; }
+.bar--empty { fill: var(--line); }
+.bar__value { font-size: 10px; fill: var(--ink); font-weight: 600; }
+.bar__label { font-size: 11px; fill: var(--muted); }
+.goal-line { stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 4 4; }
+.goal-line__label { font-size: 10px; fill: var(--ink); }
+.week-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.week-stats dt { font-size: 12px; color: var(--muted); }
+.week-stats dd { margin: 2px 0 0; font-size: 16px; font-weight: 600; }
+.week-stats dd .muted { font-size: 13px; font-weight: 500; }
+.week-stats__note { margin: 0; font-size: 12px; }
+.segmented__item { font-size: 13px; }
+.food-matches { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.food-matches__btn {
+  width: 100%; min-height: 44px; text-align: left; padding: 0 14px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--ink); font: inherit; font-size: 14px;
+}
+.food-nutrition__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stack-sm > .btn-sm { flex: none; }

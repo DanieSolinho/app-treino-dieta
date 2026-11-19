@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createEngine, resetLocalData, useSyncMeta, useSyncStatus, type Engine } from './engine';
 import type { PushBatch, RemoteSnapshot, SyncApi } from './types';
-import { useDietStore } from '../../stores/useDietStore';
+import { canPushPlan, useDietStore } from '../../stores/useDietStore';
 import { useWorkoutStore } from '../../stores/useWorkoutStore';
 import { useDayStore } from '../../stores/useDayStore';
 import { useBodyStore } from '../../stores/useBodyStore';
@@ -36,7 +36,7 @@ function fakeServer() {
       net();
       pushes.push(structuredClone(b));
       const u = user(id);
-      if (b.diet) u.diet = structuredClone(b.diet);
+      if (b.diet && canPushPlan(b.diet, u.diet)) u.diet = structuredClone(b.diet);
       if (b.workouts) u.workouts = structuredClone(b.workouts);
       if (b.waterGoalMl !== undefined) u.waterGoalMl = b.waterGoalMl;
       for (const s of b.sessions) u.sessions = [...u.sessions.filter((x) => x.id !== s.id), structuredClone(s)];
@@ -164,6 +164,30 @@ describe('sincronização', () => {
     useBodyStore.getState().deleteEntry(id);
     await tick();
     expect(server.user('dani').body).toHaveLength(0);
+  });
+
+  it('aparelho com dieta antiga pendente não sobrescreve a dieta mais nova do servidor', async () => {
+    await engine.start('dani');
+    server.setOnline(false);
+    useDietStore.setState({ plan: { ...samplePlan, title: 'antiga' } }); // pendente, sem versão
+    await tick();
+
+    server.user('dani').diet = { ...samplePlan, title: 'nova (importada no Mac)', version: 200 };
+    server.setOnline(true);
+    await engine.syncNow({ pull: true });
+
+    expect(server.user('dani').diet?.title).toBe('nova (importada no Mac)');
+    expect(useDietStore.getState().plan.title).toBe('nova (importada no Mac)');
+    expect(useSyncMeta.getState().dirty.diet).toBe(false);
+  });
+
+  it('importar um plano no aparelho vale mais que o do servidor', async () => {
+    server.user('dani').diet = { ...samplePlan, title: 'servidor', version: 200 };
+    await engine.start('dani');
+    useDietStore.getState().setPlan({ ...samplePlan, title: 'importado agora' });
+    await engine.syncNow({ pull: true });
+    expect(server.user('dani').diet?.title).toBe('importado agora');
+    expect(server.user('dani').diet?.version).toBeGreaterThan(200);
   });
 
   it('o que chega do servidor não sobrescreve o que ainda está pendente', async () => {

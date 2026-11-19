@@ -52,6 +52,18 @@ describe('lembretes: decisão', () => {
     expect(run({ water_enabled: false }, { plannedWorkouts: ['Treino D · Inferior', 'Treino E · Fullbody'] }, '18:00')[0].title).toBe('Hoje: Treino D ou Treino E');
   });
 
+  it('refeições: a partir do horário, uma vez por dia, só se faltou marcar alguma', () => {
+    const meals = { water_enabled: false, workout_enabled: false, meals_enabled: true, meals_time: '21:30:00' };
+    expect(run(meals, { mealsLeft: ['Jantar'] }, '21:00')).toEqual([]);
+    expect(run(meals, { mealsLeft: ['Jantar'] }, '21:30')).toEqual([
+      { kind: 'refeicoes', title: 'Faltou marcar: Jantar', body: 'Marque no app para o dia contar no seu foguinho.' },
+    ]);
+    expect(run(meals, { mealsLeft: ['Lanche', 'Jantar'] }, '21:45')[0].title).toBe('Faltou marcar 2 refeições');
+    expect(run(meals, { mealsLeft: [] }, '21:45')).toEqual([]);
+    expect(run({ ...meals, last_meals_push_on: '2026-11-12' }, { mealsLeft: ['Jantar'] }, '21:45')).toEqual([]);
+    expect(run({ ...meals, meals_enabled: false }, { mealsLeft: ['Jantar'] }, '21:45')).toEqual([]);
+  });
+
   it('fichas do dia: agenda por data primeiro, depois dia da semana', () => {
     const local = localNow(at('10:00'), 'Europe/Lisbon'); // quinta
     const ws = [

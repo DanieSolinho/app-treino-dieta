@@ -9,7 +9,7 @@
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { useDietStore } from '../../stores/useDietStore';
+import { isNewerPlan, useDietStore } from '../../stores/useDietStore';
 import { useWorkoutStore } from '../../stores/useWorkoutStore';
 import { useDayStore } from '../../stores/useDayStore';
 import { useBodyStore } from '../../stores/useBodyStore';
@@ -200,7 +200,11 @@ export function applyRemote(remote: RemoteSnapshot) {
   const d = useSyncMeta.getState().dirty;
   applyingRemote = true;
   try {
-    if (remote.diet && !d.diet) useDietStore.setState({ plan: remote.diet });
+    // o plano do servidor entra se não há mudança local pendente, ou se ele é mais novo que a local
+    if (remote.diet && (!d.diet || isNewerPlan(remote.diet, useDietStore.getState().plan))) {
+      useDietStore.setState({ plan: remote.diet });
+      if (d.diet) useSyncMeta.setState((m) => ({ dirty: { ...m.dirty, diet: false } }));
+    }
     if (remote.workouts && !d.workouts) {
       const { workouts, schedule, stretches } = remote.workouts;
       // agenda/alongamentos vazios no servidor não apagam os que vieram com o app

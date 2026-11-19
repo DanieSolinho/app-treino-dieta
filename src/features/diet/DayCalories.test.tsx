@@ -64,4 +64,14 @@ describe('Calorias do dia', () => {
     expect(screen.getByText('Banana prata · 130 g')).toBeTruthy();
     expect(total()).toContain('127 kcal');
   });
+
+  it('os alimentos já usados fora da dieta aparecem primeiro', () => {
+    useDayStore.setState({ offPlan: { '2026-11-01': [{ id: 'x', text: 'Maçã · 90 g', kcal: 50 }] } });
+    render(<DietPage />);
+    fireEvent.click(screen.getByRole('button', { name: '+ Registrar refeição fora da dieta' }));
+    const list = screen.getByRole('group', { name: 'Alimentos da dieta' });
+    expect(list.querySelector('.options__divider')!.textContent).toBe('Mais usados');
+    expect(list.querySelectorAll('.option__name')[0].textContent).toBe('Maçã');
+  });
 });
+

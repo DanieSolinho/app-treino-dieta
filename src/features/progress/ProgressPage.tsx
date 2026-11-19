@@ -7,11 +7,13 @@ import { formatKg } from '../../lib/loadSuggestion';
 import { measureLabels, type MeasureKey } from '../../types/body';
 import { NewEntryDialog } from './NewEntryDialog';
 import { BadgesTab } from './BadgesTab';
+import { CaloriesTab } from './CaloriesTab';
 
-type Tab = 'peso' | 'medidas' | 'cargas' | 'medalhas';
+type Tab = 'peso' | 'medidas' | 'calorias' | 'cargas' | 'medalhas';
 const tabs: { id: Tab; label: string }[] = [
   { id: 'peso', label: 'Peso' },
   { id: 'medidas', label: 'Medidas' },
+  { id: 'calorias', label: 'Calorias' },
   { id: 'cargas', label: 'Cargas' },
   { id: 'medalhas', label: 'Medalhas' },
 ];
@@ -197,6 +199,7 @@ export function ProgressPage() {
 
       {tab === 'peso' && <WeightTab />}
       {tab === 'medidas' && <MeasuresTab />}
+      {tab === 'calorias' && <CaloriesTab />}
       {tab === 'cargas' && <LoadsTab />}
       {tab === 'medalhas' && <BadgesTab />}
 

@@ -41,7 +41,7 @@ export function RemindersCard({ userId }: { userId: string }) {
   async function save() {
     setBusy(true);
     setMsg(null);
-    const wantsAny = prefs.water_enabled || prefs.workout_enabled;
+    const wantsAny = prefs.water_enabled || prefs.workout_enabled || prefs.meals_enabled;
     if (wantsAny && !device) {
       const r = await enablePush();
       if (!r.ok) {
@@ -53,6 +53,10 @@ export function RemindersCard({ userId }: { userId: string }) {
     if (prefs.window_start >= prefs.window_end) {
       setBusy(false);
       return setMsg({ text: 'O horário de início precisa ser antes do fim.', error: true });
+    }
+    if (prefs.meals_enabled && (prefs.meals_time < prefs.window_start || prefs.meals_time >= prefs.window_end)) {
+      setBusy(false);
+      return setMsg({ text: 'O aviso das refeições precisa estar dentro do horário dos lembretes.', error: true });
     }
     const ok = await savePrefs(userId, prefs);
     setBusy(false);
@@ -118,7 +122,21 @@ export function RemindersCard({ userId }: { userId: string }) {
             </label>
           )}
 
-          {(prefs.water_enabled || prefs.workout_enabled) && (
+          <label className="toggle">
+            <input type="checkbox" checked={prefs.meals_enabled} onChange={(e) => set({ meals_enabled: e.target.checked })} />
+            <span>
+              <strong>Refeições</strong>
+              <small>À noite, se ficou alguma refeição sem marcar no dia.</small>
+            </span>
+          </label>
+          {prefs.meals_enabled && (
+            <label className="field field--inline">
+              <span className="field__label">Avisar às</span>
+              <input className="input input--time" type="time" value={prefs.meals_time} onChange={(e) => set({ meals_time: e.target.value })} />
+            </label>
+          )}
+
+          {(prefs.water_enabled || prefs.workout_enabled || prefs.meals_enabled) && (
             <div className="reminders__window">
               <span className="field__label">Só entre</span>
               <input className="input input--time" type="time" aria-label="Início" value={prefs.window_start} onChange={(e) => set({ window_start: e.target.value })} />

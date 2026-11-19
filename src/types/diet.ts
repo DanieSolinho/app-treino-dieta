@@ -5,6 +5,7 @@ export interface Food {
   grams?: number;
   unit?: 'g' | 'ml'; // padrão: g
   kcal?: number; // kcal por 100 g/ml; sem isso, o app procura na tabela (src/data/kcalTable.ts)
+  protein?: number; // g de proteína por 100 g/ml; sem isso, também vem da tabela
 }
 
 /** Algo comido fora do plano, registrado à mão. */
@@ -12,6 +13,7 @@ export interface OffPlanEntry {
   id: string;
   text: string; // "2 fatias de pizza de calabresa"
   kcal: number;
+  protein?: number; // g — só quando veio da lista da dieta
 }
 
 export interface SubstitutionGroup {
@@ -51,6 +53,9 @@ export interface Meal {
 export interface DietPlan {
   title?: string;
   kcalGoal?: number; // meta do dia; sem isso, o app lê do título ("… · 1300 kcal")
+  proteinGoal?: number; // meta de proteína do dia, em gramas
+  /** Quando este plano foi importado/editado (ms). Um aparelho só substitui o plano do servidor por um mais novo. */
+  version?: number;
   meals: Meal[];
   groups: SubstitutionGroup[];
 }

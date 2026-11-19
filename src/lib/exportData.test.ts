@@ -22,3 +22,17 @@ describe('Baixar meus dados', () => {
     expect(backupFileName(new Date(2026, 10, 12))).toBe('treino-dieta-meus-dados-2026-11-12.json');
   });
 });
+
+describe('Baixar plano para reimportar', () => {
+  it('gera um arquivo que o "Importar plano" aceita', async () => {
+    const { collectPlanFile } = await import('./exportData');
+    const { parsePlanFile } = await import('./planImport');
+    const { samplePlan } = await import('../data/samplePlan');
+    const { sampleWorkouts } = await import('../data/sampleWorkouts');
+    const { sampleStretches } = await import('../data/stretchRoutines');
+    const file = collectPlanFile(new Date(2026, 10, 19));
+    expect(file.label).toBe('Backup de 19/11/2026');
+    const check = parsePlanFile(JSON.stringify(file), { diet: samplePlan, workouts: sampleWorkouts, schedule: {}, stretches: sampleStretches });
+    expect(check.ok).toBe(true);
+  });
+});

@@ -13,6 +13,9 @@ export interface ReminderSettings {
   timezone: string;
   last_water_push_at: string | null;
   last_workout_push_on: string | null; // "2026-11-12"
+  meals_enabled?: boolean;
+  meals_time?: string; // "21:30:00"
+  last_meals_push_on?: string | null;
 }
 
 export interface UserDay {
@@ -21,6 +24,7 @@ export interface UserDay {
   lastLogAt: string | null; // última vez que mexeu no dia (água/refeições)
   plannedWorkouts: string[]; // nomes das fichas de hoje ([] = descanso)
   trainedToday: boolean;
+  mealsLeft?: string[]; // refeições do plano ainda não marcadas hoje
 }
 
 export interface LocalNow {
@@ -30,7 +34,7 @@ export interface LocalNow {
 }
 
 export interface Notice {
-  kind: 'agua' | 'treino';
+  kind: 'agua' | 'treino' | 'refeicoes';
   title: string;
   body: string;
 }
@@ -123,6 +127,15 @@ export function decide(s: ReminderSettings, day: UserDay, now: Date, local: Loca
         ['Seu treino está te esperando. Bora?', 'Cada treino conta para a próxima medalha.', 'Feito é melhor que perfeito: vai lá!'],
         Number(local.date.replace(/-/g, '')),
       ),
+    });
+  }
+  // refeições: a partir do horário escolhido, uma vez por dia, se ainda falta marcar alguma
+  const left = day.mealsLeft ?? [];
+  if (s.meals_enabled && local.minutes >= toMinutes(s.meals_time ?? '21:30') && s.last_meals_push_on !== local.date && left.length > 0) {
+    out.push({
+      kind: 'refeicoes',
+      title: left.length === 1 ? `Faltou marcar: ${left[0]}` : `Faltou marcar ${left.length} refeições`,
+      body: left.length === 1 ? 'Marque no app para o dia contar no seu foguinho.' : `${left.join(', ')}. Marque no app para o dia contar.`,
     });
   }
   return out;

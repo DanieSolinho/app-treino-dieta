@@ -2,6 +2,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../database.types';
 import type { DietPlan } from '../../types/diet';
+import { canPushPlan } from '../../stores/useDietStore';
 import type { Schedule, Workout } from '../../types/workout';
 import type { StretchRoutine } from '../../data/stretchRoutines';
 import type { SyncApi } from './types';
@@ -87,7 +88,18 @@ export function supabaseSyncApi(db: Client): SyncApi {
       const run = (q: PromiseLike<{ error: { message: string } | null }>) =>
         jobs.push(Promise.resolve(q).then((r) => check({ data: null, error: r.error })));
 
-      if (b.diet) run(db.from('diet_plans').upsert({ user_id: userId, plan: b.diet as never }, { onConflict: 'user_id' }));
+      if (b.diet) {
+        const diet = b.diet;
+        // um aparelho com um plano mais antigo nunca sobrescreve o do servidor
+        jobs.push(
+          Promise.resolve(db.from('diet_plans').select('plan').eq('user_id', userId).maybeSingle()).then(async (cur) => {
+            const remote = check(cur)?.plan as unknown as DietPlan | undefined;
+            if (!canPushPlan(diet, remote)) return;
+            const r = await db.from('diet_plans').upsert({ user_id: userId, plan: diet as never }, { onConflict: 'user_id' });
+            check({ data: null, error: r.error });
+          }),
+        );
+      }
       if (b.workouts) {
         const { workouts, schedule, stretches } = b.workouts;
         run(

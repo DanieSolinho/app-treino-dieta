@@ -174,4 +174,62 @@ export const KCAL_PER_100: Record<string, number> = {
 
   // Grupo 14 · suplementos
   'whey protein': 400,
+  'whey protein fusion cookies & cream': 389,
+};
+
+/**
+ * Proteína aproximada (g) por 100 g ou 100 ml — mesma base da tabela de calorias.
+ * Para um alimento fora daqui, coloque `protein` direto no alimento do plano.
+ */
+export const PROTEIN_PER_100: Record<string, number> = {
+  'cafe': 0.7, 'cha de erva-doce': 0,
+  // folhosos
+  'acelga': 1.4, 'agriao': 2.7, 'alface crespa/lisa/americana': 1.3, 'alface roxa': 0.9, 'alho-poro': 1.4,
+  'aspargo cozido': 2.4, 'couve-manteiga crua': 2.9, 'couve refogada': 1.7, 'espinafre cru': 2,
+  'espinafre refogado': 2.7, 'pepino cru': 0.9, 'repolho refogado': 0.8,
+  // hortaliças
+  'abobrinha italiana cozida': 1.1, 'abobrinha italiana refogada': 1.1, 'abobora cabotia cozida': 1.4,
+  'abobora moranga cozida': 0.4, 'berinjela cozida': 0.7, 'beterraba cozida': 1.3, 'beterraba crua': 1.9,
+  'brocolis cozido': 2.1, 'cenoura baby': 0.6, 'cenoura cozida': 0.8, 'cenoura crua': 1.3, 'chuchu cozido': 0.4,
+  'couve-flor cozida': 1.2, 'jilo cozido': 1.4, 'palmito pupunha em conserva': 2.5, 'shimeji cozido': 2.2,
+  'shitake cozido': 1.6, 'tomate-cereja': 1.1, 'tomate salada': 0.9,
+  // carnes e proteínas
+  'acem moido cozido': 26.7, 'alcatra sem gordura grelhada': 31.9, 'atum solido em oleo': 26.2,
+  'atum light em agua': 24, 'contrafile sem gordura grelhado': 35.9, 'coxa de frango sem pele grelhada': 28.5,
+  'file de frango grelhado': 32, 'frango grelhado': 32, 'file de salmao com pele grelhado': 23.9,
+  'file de tilapia cozido': 26, 'file de tilapia': 26, 'file-mignon sem gordura grelhado': 32.8,
+  'lombo de porco assado': 35.7, 'ovo de galinha': 13, 'ovo de galinha cozido': 13.3,
+  'ovo de galinha frito/mexido': 15.6, 'ovos mexidos': 13, 'patinho moido refogado': 35.9,
+  'patinho sem gordura grelhado': 35.9, 'peito de frango desfiado': 31.5, 'pescada branca grelhada': 20,
+  'picanha sem gordura grelhada': 31.9, 'picanha com gordura grelhada': 26.4, 'salmao sem pele grelhado': 26.1,
+  'sobrecoxa de frango sem pele assada': 29.2, 'whey protein fusion cookies & cream': 79, 'whey protein': 80,
+  // cereais e tubérculos
+  'arroz branco': 2.5, 'arroz branco cozido': 2.5, 'arroz integral cozido': 2.6, 'batata-baroa/mandioquinha cozida': 0.9,
+  'batata-doce cozida': 0.6, 'batata inglesa cozida': 1.2, 'batata inglesa saute': 1.3, 'farinha de arroz': 6,
+  'inhame cozido': 2.1, 'macarrao cozido': 3.4, 'macarrao integral cozido': 5, 'mandioca/aipim cozido': 0.6,
+  'milho verde cozido': 3.2, 'milho verde enlatado': 2.4,
+  // feijão e leguminosas
+  'feijao': 4.8, 'feijao-fradinho cozido': 5.1, 'feijao carioca cozido': 4.8, 'feijao preto cozido': 4.5,
+  'grao-de-bico cozido': 8.9, 'lentilha cozida': 6.3, 'ervilha em vagem cozida': 4,
+  // frutas
+  'abacaxi': 0.9, 'ameixa crua': 0.8, 'ameixa seca': 2.2, 'banana-maca': 1.8, 'banana-ouro': 1.5,
+  'banana nanica': 1.4, 'banana prata': 1.3, 'caju cru': 0.9, 'caqui': 0.4, 'figo': 1, 'framboesa': 1.2,
+  'geleia de frutas sem acucar': 0.3, 'goiaba': 1.1, 'kiwi': 1.1, 'laranja-lima': 1.1, 'mamao formosa': 0.8,
+  'mamao': 0.8, 'manga palmer': 0.4, 'manga tommy atkins': 0.9, 'maracuja': 2, 'maca fuji': 0.3, 'maca': 0.3,
+  'maca argentina': 0.2, 'melancia': 0.9, 'melao': 0.7, 'mirtilo/blueberry': 0.7, 'morango': 0.9,
+  'pera park crua': 0.5, 'pera williams crua': 0.6, 'pinha/fruta-do-conde': 1.5, 'pessego': 0.8,
+  'suco concentrado de uva': 0.3, 'suco de laranja-lima': 0.7, 'tangerina ponca': 0.8, 'uva rubi ou italia': 0.7,
+  'agua de coco': 0,
+  // nozes e sementes
+  'castanha de caju': 18.5, 'castanha-do-para crua': 14.5, 'pasta de amendoim integral': 25,
+  // pães e fibras
+  'aveia em flocos': 13.9, 'bolacha de arroz': 7, 'cuscuz de milho cozido': 2.2, 'cuscuz de milho': 2.2,
+  'farelo de aveia': 17, 'farinha de aveia': 13, 'goma de tapioca': 0, 'granola': 10,
+  'milho de pipoca para micro-ondas': 9, 'milho de pipoca sem oleo': 12, 'pao de forma integral': 9.4,
+  'pao de forma tradicional': 8, 'pao frances': 8, 'pao sirio/pita': 9, 'pao tipo folha/wrap': 8,
+  // laticínios
+  'coalhada desnatada': 4, 'creme de ricota light': 10, 'iogurte natural desnatado': 3.8, 'leite desnatado uht': 3.4,
+  'leite desnatado em po': 34.7, 'queijo minas frescal light': 17, 'queijo minas meia cura': 21.2,
+  'queijo mucarela': 22.6, 'queijo cottage': 11, 'ricota': 12.6, 'requeijao cremoso': 9.6,
+  'queijo branco batido light (hacendado)': 9,
 };

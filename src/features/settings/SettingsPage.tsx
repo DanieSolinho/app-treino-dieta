@@ -6,7 +6,9 @@ import { useSettingsStore } from '../../stores/useSettingsStore';
 import { NumberStepper } from '../../components/ui/NumberStepper';
 import { ImportPlan } from './ImportPlan';
 import { RemindersCard } from './RemindersCard';
-import { downloadMyData } from '../../lib/exportData';
+import { useDietStore } from '../../stores/useDietStore';
+import { FoodNutritionCard } from './FoodNutritionCard';
+import { downloadMyData, downloadPlanFile } from '../../lib/exportData';
 import { exitDemo } from '../../services/demo';
 
 function SyncCard() {
@@ -112,6 +114,12 @@ export function SettingsPage() {
   const demo = useAuth((s) => s.status === 'demo');
   const goal = useSettingsStore((s) => s.waterGoalMl);
   const setGoal = useSettingsStore((s) => s.setWaterGoal);
+  const proteinGoal = useDietStore((s) => s.plan.proteinGoal);
+  const setProteinGoal = (g: number | undefined) => {
+    const { plan, setPlan } = useDietStore.getState();
+    const { proteinGoal: _old, ...rest } = plan;
+    setPlan(g === undefined ? rest : { ...rest, proteinGoal: g });
+  };
   const [error, setError] = useState('');
 
   return (
@@ -170,6 +178,31 @@ export function SettingsPage() {
         </div>
       </section>
 
+      <section className="card stack-sm" aria-labelledby="protein-goal-title">
+        <h2 id="protein-goal-title" className="card__title">
+          Meta de proteína
+        </h2>
+        {proteinGoal === undefined ? (
+          <>
+            <p className="muted">Combine a meta com a sua nutricionista. Sem meta, a Dieta mostra só quanto você comeu.</p>
+            <button type="button" className="btn-sm btn-sm--outline" onClick={() => setProteinGoal(90)}>
+              Definir meta
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="light-stepper">
+              <NumberStepper label="Por dia" value={proteinGoal} step={5} min={20} format={(n) => `${n} g`} onChange={setProteinGoal} />
+            </div>
+            <button type="button" className="link-btn" onClick={() => setProteinGoal(undefined)}>
+              Tirar a meta
+            </button>
+          </>
+        )}
+      </section>
+
+      <FoodNutritionCard />
+
       <section className="card stack-sm" aria-labelledby="data-title">
         <h2 id="data-title" className="card__title">
           Meus dados
@@ -181,6 +214,10 @@ export function SettingsPage() {
           onClick={() => downloadMyData(user ? { email: user.email, displayName: user.displayName } : undefined)}
         >
           Baixar meus dados
+        </button>
+        <p className="muted">Cópia do plano atual (dieta, fichas, agenda e alongamentos) no formato do "Importar plano", para restaurar neste ou em outro aparelho.</p>
+        <button type="button" className="btn-sm btn-sm--outline" onClick={downloadPlanFile}>
+          Baixar plano para reimportar
         </button>
       </section>
 

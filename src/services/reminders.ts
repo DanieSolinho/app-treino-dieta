@@ -7,7 +7,7 @@ import type { Database } from './database.types';
 
 export type ReminderPrefs = Pick<
   Database['public']['Tables']['reminder_settings']['Row'],
-  'water_enabled' | 'water_every_min' | 'workout_enabled' | 'workout_time' | 'window_start' | 'window_end'
+  'water_enabled' | 'water_every_min' | 'workout_enabled' | 'workout_time' | 'meals_enabled' | 'meals_time' | 'window_start' | 'window_end'
 >;
 
 export const defaultPrefs: ReminderPrefs = {
@@ -15,6 +15,8 @@ export const defaultPrefs: ReminderPrefs = {
   water_every_min: 120,
   workout_enabled: false,
   workout_time: '18:00',
+  meals_enabled: false,
+  meals_time: '21:30',
   window_start: '08:00',
   window_end: '22:00',
 };
@@ -44,6 +46,8 @@ export async function loadPrefs(userId: string): Promise<ReminderPrefs> {
     water_every_min: data.water_every_min,
     workout_enabled: data.workout_enabled,
     workout_time: hhmm(data.workout_time),
+    meals_enabled: data.meals_enabled,
+    meals_time: hhmm(data.meals_time),
     window_start: hhmm(data.window_start),
     window_end: hhmm(data.window_end),
   };

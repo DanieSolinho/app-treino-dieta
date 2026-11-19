@@ -68,4 +68,16 @@ describe('calorias', () => {
     const c = dayCalories({ ...empty, meals, offPlan: [{ id: '1', text: 'Pizza', kcal: 600 }, { id: '2', text: 'Coca', kcal: 139 }] });
     expect(c).toMatchObject({ plan: 0, offPlan: 739, total: 739 });
   });
+
+  it('soma a proteína do plano e do fora da dieta escolhido da lista', () => {
+    const c = dayCalories({
+      ...empty,
+      meals,
+      mealsDone: ['cafe'],
+      offPlan: [{ id: '1', text: 'Whey', kcal: 78, protein: 16 }, { id: '2', text: 'Pizza', kcal: 600 }],
+    });
+    // ovo 110 g × 13 = 14,3 g + iogurte 170 ml × 3,8 = 6,5 g + whey 16 g
+    expect(c.protein).toBe(37);
+  });
 });
+

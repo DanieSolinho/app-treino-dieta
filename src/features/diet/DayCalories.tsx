@@ -3,7 +3,7 @@ import type { Food, OffPlanEntry } from '../../types/diet';
 import { useDietStore } from '../../stores/useDietStore';
 import { useDayStore } from '../../stores/useDayStore';
 import { useWorkoutStore } from '../../stores/useWorkoutStore';
-import { dayCalories, formatKcal, kcalFor, kcalGoal, normalizeName } from '../../lib/calories';
+import { dayCalories, formatKcal, kcalFor, kcalGoal, normalizeName, proteinFor } from '../../lib/calories';
 import { formatAmount } from '../../lib/food';
 import { toDateKey } from '../../lib/date';
 
@@ -38,14 +38,35 @@ const unitOf = (food: Food) => food.unit ?? 'g';
 const parseNumber = (text: string) => Number(text.replace(',', '.'));
 
 /** Escolher um alimento da dieta: mostra a porção sugerida e calcula as calorias da quantidade. */
+/** Alimentos da lista já registrados fora da dieta, do mais usado para o menos (até 5). */
+function useFrequent(options: DietOption[]): DietOption[] {
+  const offPlan = useDayStore((s) => s.offPlan);
+  return useMemo(() => {
+    const count = new Map<string, number>();
+    for (const entries of Object.values(offPlan))
+      for (const e of entries) {
+        const name = e.text.split(' · ')[0];
+        count.set(name, (count.get(name) ?? 0) + 1);
+      }
+    const seen = new Set<string>();
+    return options
+      .filter((o) => count.has(o.food.name) && !seen.has(o.food.name) && seen.add(o.food.name))
+      .sort((a, b) => count.get(b.food.name)! - count.get(a.food.name)!)
+      .slice(0, 5);
+  }, [offPlan, options]);
+}
+
 function FromDietForm({ onAdd, onCancel }: { onAdd: (entry: Omit<OffPlanEntry, 'id'>) => void; onCancel: () => void }) {
   const options = useDietOptions();
+  const frequent = useFrequent(options);
   const [query, setQuery] = useState('');
   const [picked, setPicked] = useState<DietOption | null>(null);
   const [grams, setGrams] = useState('');
 
   const q = normalizeName(query);
-  const visible = q ? options.filter((o) => normalizeName(o.food.name).includes(q)) : options;
+  const visible = q
+    ? options.filter((o) => normalizeName(o.food.name).includes(q))
+    : [...frequent.map((o) => ({ ...o, key: `fav-${o.key}`, group: 'Mais usados' })), ...options];
   const amount = parseNumber(grams);
   const valid = picked !== null && grams.trim() !== '' && Number.isFinite(amount) && amount > 0;
   const kcal = valid ? kcalFor(picked.food, amount) : undefined;
@@ -59,7 +80,8 @@ function FromDietForm({ onAdd, onCancel }: { onAdd: (entry: Omit<OffPlanEntry, '
     e.preventDefault();
     if (!valid || kcal === undefined) return;
     const qty = `${amount.toLocaleString('pt-BR')} ${unitOf(picked.food)}`;
-    onAdd({ text: `${picked.food.name} · ${qty}`, kcal });
+    const protein = proteinFor(picked.food, amount);
+    onAdd({ text: `${picked.food.name} · ${qty}`, kcal, ...(protein !== undefined ? { protein: Math.round(protein) } : {}) });
   }
 
   let lastGroup = '';
@@ -298,6 +320,10 @@ function TotalCard() {
           </div>
         )}
       </dl>
+      <p className="kcal__protein">
+        Proteína: <strong>{c.protein} g</strong>
+        {plan.proteinGoal !== undefined ? <span> de {plan.proteinGoal} g</span> : <span> · defina a meta em Ajustes</span>}
+      </p>
       {burned > 0 && (
         <p className="kcal__burned">
           Treino: <strong>{formatKcal(burned)} gastas</strong> <span>· não muda a meta</span>

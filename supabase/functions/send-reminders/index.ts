@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
   const { data: settings, error } = await db
     .from('reminder_settings')
     .select('*')
-    .or('water_enabled.eq.true,workout_enabled.eq.true');
+    .or('water_enabled.eq.true,workout_enabled.eq.true,meals_enabled.eq.true');
   if (error) return json(500, { error: error.message });
 
   const report = { users: 0, sent: 0, removed: 0, failed: 0 };
@@ -67,16 +67,19 @@ Deno.serve(async (req) => {
     report.users++;
 
     const local = localNow(now, s.timezone);
-    const [profile, day, plan, sessions] = await Promise.all([
+    const [profile, day, plan, sessions, diet] = await Promise.all([
       db.from('profiles').select('water_goal_ml').eq('id', s.user_id).maybeSingle(),
-      db.from('day_logs').select('water_log, updated_at').eq('user_id', s.user_id).eq('date', local.date).maybeSingle(),
+      db.from('day_logs').select('water_log, meals_done, updated_at').eq('user_id', s.user_id).eq('date', local.date).maybeSingle(),
       db.from('workout_plans').select('workouts, schedule').eq('user_id', s.user_id).maybeSingle(),
       db
         .from('workout_sessions')
         .select('started_at')
         .eq('user_id', s.user_id)
         .gte('started_at', new Date(now.getTime() - 36 * 3600000).toISOString()),
+      db.from('diet_plans').select('plan').eq('user_id', s.user_id).maybeSingle(),
     ]);
+    const meals = ((diet.data?.plan as { meals?: { id: string; name: string }[] } | null)?.meals ?? []);
+    const done = (day.data?.meals_done as string[] | null) ?? [];
 
     const water = ((day.data?.water_log as number[] | null) ?? []).reduce((a, b) => a + b, 0);
     const notices = decide(
@@ -87,6 +90,7 @@ Deno.serve(async (req) => {
         lastLogAt: day.data?.updated_at ?? null,
         plannedWorkouts: plannedNames((plan.data?.workouts as never[]) ?? [], (plan.data?.schedule as never) ?? null, local),
         trainedToday: (sessions.data ?? []).some((x) => localNow(new Date(x.started_at), s.timezone).date === local.date),
+        mealsLeft: meals.filter((m) => !done.includes(m.id)).map((m) => m.name),
       },
       now,
       local,
@@ -116,6 +120,7 @@ Deno.serve(async (req) => {
     const update: Record<string, string> = {};
     if (notices.some((n) => n.kind === 'agua')) update.last_water_push_at = now.toISOString();
     if (notices.some((n) => n.kind === 'treino')) update.last_workout_push_on = local.date;
+    if (notices.some((n) => n.kind === 'refeicoes')) update.last_meals_push_on = local.date;
     await db.from('reminder_settings').update(update).eq('user_id', s.user_id);
   }
 

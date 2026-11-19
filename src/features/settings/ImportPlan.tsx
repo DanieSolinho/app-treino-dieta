@@ -64,7 +64,7 @@ export function ImportPlan() {
     if (useWorkoutStore.getState().active) return setError('Termine ou cancele o treino em andamento antes de importar.');
     setStep({ kind: 'applying' });
     const next = applyPlan(plan, currentPlan());
-    if (plan.diet) useDietStore.setState({ plan: next.diet });
+    if (plan.diet) useDietStore.getState().setPlan(next.diet);
     useWorkoutStore.setState({ workouts: next.workouts, schedule: next.schedule, stretches: next.stretches });
 
     let warning: string | undefined;

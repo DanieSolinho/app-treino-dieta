@@ -156,7 +156,10 @@ export type Database = {
       }
       reminder_settings: {
         Row: {
+          last_meals_push_on: string | null
           last_water_push_at: string | null
+          meals_enabled: boolean
+          meals_time: string
           last_workout_push_on: string | null
           timezone: string
           updated_at: string
@@ -169,7 +172,10 @@ export type Database = {
           workout_time: string
         }
         Insert: {
+          last_meals_push_on?: string | null
           last_water_push_at?: string | null
+          meals_enabled?: boolean
+          meals_time?: string
           last_workout_push_on?: string | null
           timezone?: string
           updated_at?: string
@@ -182,7 +188,10 @@ export type Database = {
           workout_time?: string
         }
         Update: {
+          last_meals_push_on?: string | null
           last_water_push_at?: string | null
+          meals_enabled?: boolean
+          meals_time?: string
           last_workout_push_on?: string | null
           timezone?: string
           updated_at?: string
