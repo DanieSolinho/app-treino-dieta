@@ -4,6 +4,7 @@ import { formatLongDate, toDateKey } from '../../lib/date';
 import { WaterTracker } from './WaterTracker';
 import { useStreak } from './useStreak';
 import { TodayWorkoutCard } from './TodayWorkoutCard';
+import { PlanEndingNotice } from '../workouts/PlanEndingNotice';
 import { WeekSummaryCard } from './WeekSummaryCard';
 
 const NO_MEALS: string[] = [];
@@ -45,6 +46,7 @@ export function TodayPage({ goTo }: Props) {
       <WeekSummaryCard />
 
       <TodayWorkoutCard goTo={goTo} />
+      <PlanEndingNotice />
 
       <WaterTracker />
 

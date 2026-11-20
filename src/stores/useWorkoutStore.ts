@@ -4,6 +4,7 @@ import { CARDIO_WORKOUT_ID, type CardioMachine, type Effort, type Schedule, type
 import type { StretchRoutine } from '../data/stretchRoutines';
 import { defaultSchedule, defaultStretches, defaultWorkouts } from '../data';
 import { suggestLoad } from '../lib/loadSuggestion';
+import { suggestParts } from '../lib/conjugated';
 import { newId } from '../lib/id';
 
 interface WorkoutState {
@@ -132,9 +133,11 @@ export const useWorkoutStore = create<WorkoutState>()(
         const exercises = workout.exercises.map((ex) => {
           const done = active.logs[ex.id];
           if (!done?.length) return ex; // exercício pulado: nada muda
-          const suggestion = suggestLoad(ex, done, previousLogs(sessions, ex.id));
+          const previous = previousLogs(sessions, ex.id);
+          const parts = suggestParts(ex, done, previous);
+          const suggestion = { ...suggestLoad(ex, done, previous), ...(parts ? { parts } : {}) };
           suggestions[ex.id] = suggestion;
-          return { ...ex, currentLoad: suggestion.load };
+          return { ...ex, currentLoad: suggestion.load, ...(parts ? { partLoads: parts.map((p) => p.load) } : {}) };
         });
 
         const finished: WorkoutSession = { ...active, finishedAt: new Date().toISOString(), suggestions };

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { SessionKcal } from './SessionKcal';
 import { useWorkoutStore } from '../../stores/useWorkoutStore';
 import { machineLabel, type CardioMachine } from '../../types/workout';
 import { mmss, useCountdown } from '../../hooks/useCountdown';
@@ -9,7 +10,7 @@ import { lastWeekRange } from '../../lib/achievements';
 import { toDateKey } from '../../lib/date';
 import { MachineIcon, MachinePicker, lastMachine, rememberMachine } from './MachinePicker';
 
-type Step = { kind: 'setup' } | { kind: 'running' } | { kind: 'done'; minutes: number };
+type Step = { kind: 'setup' } | { kind: 'running' } | { kind: 'done'; minutes: number; sessionId: string };
 
 /** Cardio avulso: escolhe o aparelho e o tempo, usa o cronômetro ou só registra o que já fez. */
 export function CardioSession({ onClose }: { onClose: () => void }) {
@@ -24,8 +25,8 @@ export function CardioSession({ onClose }: { onClose: () => void }) {
   function finish(done: number) {
     if (done <= 0) return setStep({ kind: 'setup' });
     rememberMachine(machine);
-    save(machine, done);
-    setStep({ kind: 'done', minutes: done });
+    const session = save(machine, done);
+    setStep({ kind: 'done', minutes: done, sessionId: session.id });
   }
 
   // o tempo acabou: registra os minutos completos
@@ -46,6 +47,9 @@ export function CardioSession({ onClose }: { onClose: () => void }) {
             {step.minutes} min {machine === 'bike' || machine === 'esteira' ? 'na' : 'no'} {machineLabel(machine).toLowerCase()}
           </h1>
           <p className="active__meta">{week > step.minutes ? `Já são ${week} min de cardio nesta semana. Constância é isso.` : 'Primeiro cardio da semana. Bom começo!'}</p>
+          <div className="card cardio-kcal">
+            <SessionKcal sessionId={step.sessionId} />
+          </div>
           <button type="button" className="btn btn--lime" onClick={onClose}>
             Voltar
           </button>

@@ -667,3 +667,5 @@ fieldset.field > legend { margin-bottom: 8px; }
 .stack-sm > .btn-sm { flex: none; }
 .set-entry__part { margin: 0; font-size: 14px; font-weight: 600; color: var(--bg); }
 .set-entry__more { display: flex; flex-direction: column; gap: 10px; padding-top: 10px; border-top: 1px solid #2e3537; }
+.pace__value { margin: 0; font-family: var(--font-display); font-size: 24px; font-weight: 700; }
+.cardio-kcal { width: 100%; text-align: left; color: var(--ink); }

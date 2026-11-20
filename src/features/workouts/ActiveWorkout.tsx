@@ -44,7 +44,7 @@ function SetEntry({ ex, done, onLog }: { ex: Exercise; done: SetLog[]; onLog: (s
   // conjugados: carga e reps do 2º exercício em diante (começa com o que você usou na série anterior)
   const [extra, setExtra] = useState(() =>
     names.slice(1).map((_, i) => ({
-      load: last?.parts?.[i]?.load ?? 0,
+      load: last?.parts?.[i]?.load ?? ex.partLoads?.[i] ?? 0,
       reps: targetReps(targets[i + 1]) ?? last?.parts?.[i]?.reps ?? reps,
     })),
   );

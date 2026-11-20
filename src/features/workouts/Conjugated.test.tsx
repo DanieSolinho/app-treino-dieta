@@ -54,4 +54,19 @@ describe('exercícios conjugados', () => {
     expect(screen.getByText('20 kg + 10 kg')).toBeTruthy();
     expect(screen.getByText(/12 \+ 10 reps/)).toBeTruthy();
   });
+
+  it('sugere carga também para o 2º exercício e começa a próxima série com ela', () => {
+    const { logSet, finishSession } = useWorkoutStore.getState();
+    // bíceps bateu o topo da faixa (12) na 1ª série sem "difícil" → sobe
+    logSet('B3', { load: 20, reps: 15, effort: 'ok', parts: [{ load: 10, reps: 12 }] });
+    logSet('B3', { load: 22.5, reps: 12, effort: 'ok', parts: [{ load: 10, reps: 10 }] });
+    const done = finishSession()!;
+    expect(done.suggestions!.B3.parts).toEqual([{ action: 'aumentar', load: 12.5 }]);
+    expect(useWorkoutStore.getState().workouts[0].exercises[0].partLoads).toEqual([12.5]);
+
+    useWorkoutStore.getState().startSession('B');
+    render(<ActiveWorkout onFinished={() => {}} />);
+    expect(screen.getByRole('group', { name: 'Carga · Bíceps na corda (cross)' }).textContent).toContain('12,5 kg');
+  });
 });
+

@@ -3,8 +3,8 @@ import { useWorkoutStore } from '../../stores/useWorkoutStore';
 import { SessionKcal } from './SessionKcal';
 import { WEEKDAYS, formatWeekDays } from './weekdays';
 import { totalSeconds } from '../../data/stretchRoutines';
-import { lastScheduledDate, plannedFor, shortName, upcoming } from '../../lib/schedule';
-import { toDateKey } from '../../lib/date';
+import { plannedFor, shortName, upcoming } from '../../lib/schedule';
+import { PlanEndingNotice } from './PlanEndingNotice';
 import { cardioText } from '../../lib/cardio';
 import { CARDIO_WORKOUT_ID } from '../../types/workout';
 import { MachineIcon } from './MachinePicker';
@@ -25,8 +25,6 @@ export function WorkoutList({ onEdit, onStretch, onAgenda, onCardio }: Props) {
   const week = useMemo(() => upcoming(new Date(), 7, workouts, schedule), [workouts, schedule]);
   const todayIds = useMemo(() => plannedFor(new Date(), workouts, schedule).workouts.map((w) => w.id), [workouts, schedule]);
   const hasPlan = week.some((d) => d.plan.fromSchedule || d.plan.workouts.length > 0);
-  const last = lastScheduledDate(schedule);
-  const endsSoon = last !== undefined && last < toDateKey(new Date(Date.now() + 7 * 864e5));
 
   return (
     <main className="page">
@@ -45,12 +43,7 @@ export function WorkoutList({ onEdit, onStretch, onAgenda, onCardio }: Props) {
           Editar agenda
         </button>
       </div>
-      {endsSoon && (
-        <p className="note">
-          Sua agenda vai até {new Date(`${last}T12:00:00`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })}. Toque em Editar agenda para
-          marcar os próximos dias.
-        </p>
-      )}
+      <PlanEndingNotice />
 
       {hasPlan && (
         <section aria-label="Próximos 7 dias" className="week">

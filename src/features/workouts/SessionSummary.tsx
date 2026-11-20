@@ -5,7 +5,7 @@ import { mmss } from '../../hooks/useCountdown';
 import { sessionMilestone, sessionRecords } from '../../lib/achievements';
 import { cardioText } from '../../lib/cardio';
 import { SessionKcal } from './SessionKcal';
-import { setVolume } from '../../lib/conjugated';
+import { exerciseParts, setVolume } from '../../lib/conjugated';
 
 interface Props {
   sessionId: string;
@@ -34,7 +34,9 @@ export function SessionSummary({ sessionId, onClose }: Props) {
   const allSets = Object.values(session.logs).flat();
   const volume = allSets.reduce((sum, s) => sum + setVolume(s), 0);
   const cardioMinutes = Object.values(session.cardio ?? {}).reduce((a, b) => a + b, 0);
-  const ups = Object.values(session.suggestions ?? {}).filter((s) => s.action === 'aumentar').length;
+  const ups = Object.values(session.suggestions ?? {})
+    .flatMap((s) => [s, ...(s.parts ?? [])])
+    .filter((s) => s.action === 'aumentar').length;
 
   return (
     <main className="page">
@@ -89,14 +91,16 @@ export function SessionSummary({ sessionId, onClose }: Props) {
             .filter((ex) => session.suggestions?.[ex.id])
             .map((ex) => {
               const s = session.suggestions![ex.id];
-              return (
-                <li key={ex.id} className="next-list__row">
-                  <span className="next-list__name">{ex.name}</span>
-                  <span className={`next-list__load next-list__load--${s.action}`}>
-                    {actionText[s.action]} {formatKg(s.load)}
+              const names = exerciseParts(ex);
+              const rows = [{ name: names.length > 1 ? names[0] : ex.name, ...s }, ...(s.parts ?? []).map((p, i) => ({ name: names[i + 1], ...p }))];
+              return rows.map((r, i) => (
+                <li key={`${ex.id}-${i}`} className="next-list__row">
+                  <span className="next-list__name">{r.name}</span>
+                  <span className={`next-list__load next-list__load--${r.action}`}>
+                    {actionText[r.action]} {formatKg(r.load)}
                   </span>
                 </li>
-              );
+              ));
             })}
         </ul>
       </section>

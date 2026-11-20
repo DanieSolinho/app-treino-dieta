@@ -3,8 +3,10 @@ import { useDietStore } from '../../stores/useDietStore';
 import { useDayStore } from '../../stores/useDayStore';
 import { useWorkoutStore } from '../../stores/useWorkoutStore';
 import { formatKcal, kcalGoal } from '../../lib/calories';
-import { lastDays, weekCalories, weekStats } from '../../lib/weekCalories';
+import { lastDays, weekCalories, weekStats, weightPace } from '../../lib/weekCalories';
+import { useBodyStore } from '../../stores/useBodyStore';
 
+const fmtDay = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
 const WEEKDAY = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 const W = 320;
 const H = 170;
@@ -19,6 +21,14 @@ export function CaloriesTab() {
   const offPlan = useDayStore((s) => s.offPlan);
   const sessions = useWorkoutStore((s) => s.sessions);
   const goal = kcalGoal(plan);
+  const entries = useBodyStore((s) => s.entries);
+  const pace = useMemo(() => weightPace(entries), [entries]);
+  // média das calorias no mesmo período do ritmo do peso
+  const paceKcal = useMemo(() => {
+    if (!pace) return undefined;
+    const dates = lastDays(28).filter((d) => d >= pace.from && d <= pace.to);
+    return weekStats(weekCalories(plan, { mealsDone, variants, swaps, amounts, offPlan }, sessions, dates)).avgEaten;
+  }, [pace, plan, mealsDone, variants, swaps, amounts, offPlan, sessions]);
 
   const days = useMemo(
     () => weekCalories(plan, { mealsDone, variants, swaps, amounts, offPlan }, sessions, lastDays(7)),
@@ -32,6 +42,7 @@ export function CaloriesTab() {
   const y = (v: number) => PAD.top + innerH - (v / max) * innerH;
 
   return (
+    <>
     <section className="card stack-sm" aria-labelledby="week-kcal-title">
       <h2 id="week-kcal-title" className="card__title">
         Últimos 7 dias
@@ -96,8 +107,40 @@ export function CaloriesTab() {
           <dt>Gasto nos treinos</dt>
           <dd>{stats.burned ? formatKcal(stats.burned) : '—'}</dd>
         </div>
+        <div>
+          <dt>Fora da dieta</dt>
+          <dd>
+            {stats.offPlanDays ? (
+              <>
+                {stats.offPlanDays} {stats.offPlanDays === 1 ? 'dia' : 'dias'} <span className="muted">· {formatKcal(stats.offPlanKcal)}</span>
+              </>
+            ) : (
+              'nenhum dia'
+            )}
+          </dd>
+        </div>
       </dl>
       <p className="muted week-stats__note">A média conta só os dias com algo registrado. O gasto nos treinos vem do relógio e não muda a meta.</p>
     </section>
+
+    <section className="card stack-sm" aria-labelledby="pace-title">
+      <h2 id="pace-title" className="card__title">
+        Ritmo do peso
+      </h2>
+      {pace ? (
+        <>
+          <p className="pace__value">
+            {pace.kgPerWeek === 0 ? 'Estável' : `${pace.kgPerWeek > 0 ? '+' : '−'}${Math.abs(pace.kgPerWeek).toLocaleString('pt-BR')} kg por semana`}
+          </p>
+          <p className="muted">
+            {pace.points} pesagens de {fmtDay(pace.from)} a {fmtDay(pace.to)}
+            {paceKcal ? `, com média de ${formatKcal(paceKcal)} nos dias registrados` : ''}.
+          </p>
+        </>
+      ) : (
+        <p className="muted">Registre o peso pelo menos 3 vezes, cobrindo uma semana ou mais, para ver o ritmo. Um peso sozinho oscila muito com água e sal.</p>
+      )}
+    </section>
+    </>
   );
 }

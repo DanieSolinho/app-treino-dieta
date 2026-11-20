@@ -9,6 +9,8 @@ export type Progression = 'dupla' | 'piramide';
 export interface Exercise {
   /** Exercícios conjugados, na ordem. Sem isso, o app separa o nome pelo " + ". */
   parts?: string[];
+  /** Conjugados: carga atual do 2º exercício em diante (kg), na ordem. */
+  partLoads?: number[];
   id: string;
   name: string;
   sets: number; // ex.: 4
@@ -75,6 +77,8 @@ export type SuggestionAction = 'aumentar' | 'manter' | 'reduzir';
 export interface Suggestion {
   action: SuggestionAction;
   load: number;
+  /** Conjugados: sugestão do 2º exercício em diante, na ordem. */
+  parts?: { action: SuggestionAction; load: number }[];
 }
 
 export interface WorkoutSession {
