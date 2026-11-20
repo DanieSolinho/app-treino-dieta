@@ -5,6 +5,7 @@ import { mmss } from '../../hooks/useCountdown';
 import { sessionMilestone, sessionRecords } from '../../lib/achievements';
 import { cardioText } from '../../lib/cardio';
 import { SessionKcal } from './SessionKcal';
+import { setVolume } from '../../lib/conjugated';
 
 interface Props {
   sessionId: string;
@@ -31,7 +32,7 @@ export function SessionSummary({ sessionId, onClose }: Props) {
     ? Math.round((Date.parse(session.finishedAt) - Date.parse(session.startedAt)) / 1000)
     : 0;
   const allSets = Object.values(session.logs).flat();
-  const volume = allSets.reduce((sum, s) => sum + s.load * s.reps, 0);
+  const volume = allSets.reduce((sum, s) => sum + setVolume(s), 0);
   const cardioMinutes = Object.values(session.cardio ?? {}).reduce((a, b) => a + b, 0);
   const ups = Object.values(session.suggestions ?? {}).filter((s) => s.action === 'aumentar').length;
 

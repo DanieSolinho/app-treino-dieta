@@ -665,3 +665,5 @@ fieldset.field > legend { margin-bottom: 8px; }
 }
 .food-nutrition__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .stack-sm > .btn-sm { flex: none; }
+.set-entry__part { margin: 0; font-size: 14px; font-weight: 600; color: var(--bg); }
+.set-entry__more { display: flex; flex-direction: column; gap: 10px; padding-top: 10px; border-top: 1px solid #2e3537; }

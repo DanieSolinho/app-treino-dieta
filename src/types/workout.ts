@@ -7,6 +7,8 @@ export type Effort = 'facil' | 'ok' | 'dificil';
 export type Progression = 'dupla' | 'piramide';
 
 export interface Exercise {
+  /** Exercícios conjugados, na ordem. Sem isso, o app separa o nome pelo " + ". */
+  parts?: string[];
   id: string;
   name: string;
   sets: number; // ex.: 4
@@ -61,9 +63,11 @@ export interface Workout {
 export type Schedule = Record<string, string[]>;
 
 export interface SetLog {
-  load: number;
+  load: number; // 1º exercício (é o que decide a sugestão de carga)
   reps: number;
   effort?: Effort;
+  /** Conjugados: carga e repetições do 2º exercício em diante, na ordem. */
+  parts?: { load: number; reps: number }[];
 }
 
 export type SuggestionAction = 'aumentar' | 'manter' | 'reduzir';

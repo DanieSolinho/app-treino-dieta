@@ -3,6 +3,7 @@ import type { Effort, Exercise, SetLog } from '../../types/workout';
 import { effortLabel, previousLogs, useWorkoutStore } from '../../stores/useWorkoutStore';
 import { NumberStepper } from '../../components/ui/NumberStepper';
 import { formatKg, targetReps } from '../../lib/loadSuggestion';
+import { exerciseParts, partTargets, setParts } from '../../lib/conjugated';
 import { useImage } from '../../services/images';
 import { CardioCard } from './CardioCard';
 import { StretchPlayer } from './StretchPlayer';
@@ -36,20 +37,52 @@ function lastTimeHint(ex: Exercise, previous?: SetLog[]) {
 function SetEntry({ ex, done, onLog }: { ex: Exercise; done: SetLog[]; onLog: (s: SetLog) => void }) {
   const last = done.at(-1);
   const target = ex.setTargets?.[done.length];
+  const names = exerciseParts(ex);
+  const targets = partTargets(target, names.length);
   const [load, setLoad] = useState(last?.load ?? ex.currentLoad);
-  const [reps, setReps] = useState(targetReps(target) ?? last?.reps ?? ex.repMax);
+  const [reps, setReps] = useState(targetReps(targets[0] ?? target) ?? last?.reps ?? ex.repMax);
+  // conjugados: carga e reps do 2º exercício em diante (começa com o que você usou na série anterior)
+  const [extra, setExtra] = useState(() =>
+    names.slice(1).map((_, i) => ({
+      load: last?.parts?.[i]?.load ?? 0,
+      reps: targetReps(targets[i + 1]) ?? last?.parts?.[i]?.reps ?? reps,
+    })),
+  );
   const [effort, setEffort] = useState<Effort>('ok');
+  const setPart = (i: number, patch: Partial<{ load: number; reps: number }>) =>
+    setExtra((xs) => xs.map((x, j) => (j === i ? { ...x, ...patch } : x)));
+  const conjugated = names.length > 1;
 
   return (
     <div className="set-entry">
       <p className="set-entry__title">Série {done.length + 1} · agora</p>
       {target && <p className="set-entry__target">{target}</p>}
+      {conjugated && <p className="set-entry__part">{names[0]}</p>}
       <div className="set-entry__steppers">
         {!ex.bodyweight && (
           <NumberStepper label="Carga" value={load} step={ex.increment || 1} format={(n) => formatKg(n)} onChange={setLoad} />
         )}
         <NumberStepper label="Reps" value={reps} step={1} min={1} onChange={setReps} />
       </div>
+      {extra.map((p, i) => (
+        <div key={names[i + 1]} className="set-entry__more">
+          <p className="set-entry__part">{names[i + 1]}</p>
+          <div className="set-entry__steppers">
+            {!ex.bodyweight && (
+              <NumberStepper
+                label="Carga"
+                name={`Carga · ${names[i + 1]}`}
+                value={p.load}
+                step={ex.increment || 1}
+                min={0}
+                format={(n) => formatKg(n)}
+                onChange={(v) => setPart(i, { load: v })}
+              />
+            )}
+            <NumberStepper label="Reps" name={`Reps · ${names[i + 1]}`} value={p.reps} step={1} min={1} onChange={(v) => setPart(i, { reps: v })} />
+          </div>
+        </div>
+      ))}
       <div className="chips" role="radiogroup" aria-label="Esforço">
         {efforts.map((e) => (
           <button
@@ -64,7 +97,7 @@ function SetEntry({ ex, done, onLog }: { ex: Exercise; done: SetLog[]; onLog: (s
           </button>
         ))}
       </div>
-      <button type="button" className="btn btn--lime" onClick={() => onLog({ load, reps, effort })}>
+      <button type="button" className="btn btn--lime" onClick={() => onLog({ load, reps, effort, ...(conjugated ? { parts: extra } : {}) })}>
         Concluir série
       </button>
     </div>
@@ -212,9 +245,9 @@ export function ActiveWorkout({ onFinished }: Props) {
           {done.map((s, i) => (
             <div key={i} className="sets__row">
               <span>{i + 1}</span>
-              <span>{ex.bodyweight ? 'sem carga' : formatKg(s.load)}</span>
+              <span>{ex.bodyweight ? 'sem carga' : setParts(s).map((p) => formatKg(p.load)).join(' + ')}</span>
               <span>
-                {s.reps} reps · {s.effort ? effortLabel[s.effort] : '—'}
+                {setParts(s).map((p) => p.reps).join(' + ')} reps · {s.effort ? effortLabel[s.effort] : '—'}
               </span>
               {i === done.length - 1 ? (
                 <button type="button" className="link-btn link-btn--lime" onClick={() => undoSet(ex.id)}>
