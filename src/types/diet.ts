@@ -48,6 +48,8 @@ export interface Meal {
   items: MealItem[];
   defaultLabel?: string; // nome da versão principal quando há variantes ("Com feijão")
   variants?: MealVariant[];
+  /** Refeição extra (ex.: lanche da manhã): não entra no lembrete de "faltou marcar". */
+  optional?: boolean;
 }
 
 export interface DietPlan {

@@ -101,6 +101,7 @@ export function MealCard({ meal, done, onToggle, onSwap }: Props) {
         <label className="meal__check">
           <input type="checkbox" checked={done} onChange={onToggle} />
           <span className="meal__name">{meal.name}</span>
+          {meal.optional && <span className="meal__tag">opcional</span>}
         </label>
         {meal.time && <span className="muted">{meal.time}</span>}
       </header>

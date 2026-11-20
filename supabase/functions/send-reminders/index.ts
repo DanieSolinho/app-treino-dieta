@@ -78,7 +78,9 @@ Deno.serve(async (req) => {
         .gte('started_at', new Date(now.getTime() - 36 * 3600000).toISOString()),
       db.from('diet_plans').select('plan').eq('user_id', s.user_id).maybeSingle(),
     ]);
-    const meals = ((diet.data?.plan as { meals?: { id: string; name: string }[] } | null)?.meals ?? []);
+    const meals = ((diet.data?.plan as { meals?: { id: string; name: string; optional?: boolean }[] } | null)?.meals ?? []).filter(
+      (m) => !m.optional, // refeição extra não gera "faltou marcar"
+    );
     const done = (day.data?.meals_done as string[] | null) ?? [];
 
     const water = ((day.data?.water_log as number[] | null) ?? []).reduce((a, b) => a + b, 0);
